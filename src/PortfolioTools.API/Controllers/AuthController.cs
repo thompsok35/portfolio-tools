@@ -104,7 +104,7 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(ApplicationUser user)
     {
-        var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -126,6 +126,11 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Generates a URL-safe, cryptographically random API token (48 bytes = ~64 base64 characters
+    /// after padding removal). This token is distinct from the JWT and is used for long-lived
+    /// machine-to-machine integration with other portfolio management tools.
+    /// </summary>
     private static string GenerateApiToken()
     {
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(48))

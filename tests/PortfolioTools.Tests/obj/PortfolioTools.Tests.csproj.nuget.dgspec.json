@@ -10,7 +10,7 @@
         "projectUniqueName": "/home/runner/work/portfolio-tools/portfolio-tools/src/PortfolioTools.API/PortfolioTools.API.csproj",
         "projectName": "PortfolioTools.API",
         "projectPath": "/home/runner/work/portfolio-tools/portfolio-tools/src/PortfolioTools.API/PortfolioTools.API.csproj",
-        "packagesPath": "/home/runner/.nuget/packages/",
+        "packagesPath": "/tmp/codeql-scratch-3b2af8d68b390e43/dbs/csharp/working/packages",
         "outputPath": "/home/runner/work/portfolio-tools/portfolio-tools/src/PortfolioTools.API/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
@@ -118,7 +118,7 @@
         "projectUniqueName": "/home/runner/work/portfolio-tools/portfolio-tools/tests/PortfolioTools.Tests/PortfolioTools.Tests.csproj",
         "projectName": "PortfolioTools.Tests",
         "projectPath": "/home/runner/work/portfolio-tools/portfolio-tools/tests/PortfolioTools.Tests/PortfolioTools.Tests.csproj",
-        "packagesPath": "/home/runner/.nuget/packages/",
+        "packagesPath": "/tmp/codeql-scratch-3b2af8d68b390e43/dbs/csharp/working/packages",
         "outputPath": "/home/runner/work/portfolio-tools/portfolio-tools/tests/PortfolioTools.Tests/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [

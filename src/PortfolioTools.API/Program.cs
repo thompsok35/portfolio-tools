@@ -10,6 +10,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Validate JWT key — override via Jwt__Key environment variable or dotnet user-secrets.
+// Never deploy with the placeholder value. Example:
+//   dotnet user-secrets set "Jwt:Key" "$(openssl rand -base64 48)"
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.");
+if (!builder.Environment.IsDevelopment() && jwtKey.StartsWith("PLACEHOLDER_"))
+    throw new InvalidOperationException("Production deployments must override Jwt:Key with a secure secret.");
+
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -25,7 +32,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
