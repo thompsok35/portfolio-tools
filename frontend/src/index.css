@@ -1,0 +1,13 @@
+/* Global resets are handled in App.css */
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+a {
+  text-decoration: none;
+}
+
+#root {
+  width: 100%;
+}
