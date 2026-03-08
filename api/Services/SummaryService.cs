@@ -1,0 +1,87 @@
+using Microsoft.EntityFrameworkCore;
+using api.Data;
+using api.Models;
+
+namespace api.Services;
+
+public class SummaryDashboardStats
+{
+    public decimal TotalIncome { get; set; }
+    public decimal TotalExpenses { get; set; }
+    public decimal NetSurplusDeficit => TotalIncome - TotalExpenses;
+    public List<IncomeSource> ExpectedIncomes { get; set; } = new List<IncomeSource>();
+}
+
+public class SummaryService
+{
+    private readonly AppDbContext _context;
+
+    public SummaryService(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<SummaryDashboardStats> GetMonthlySummaryAsync(int year, int month)
+    {
+        // 1. Calculate Total Foundational Expenses
+        // For simplicity, we assume fixed expenses are expected every month.
+        var totalExpenses = await _context.ExpenseCategories.SumAsync(e => e.PlannedAmount);
+
+        // 2. Calculate Expected Income for the target month
+        var allIncome = await _context.IncomeSources.ToListAsync();
+        
+        decimal expectedIncome = 0;
+
+        var expectedIncomeItems = new List<IncomeSource>();
+
+        foreach (var income in allIncome)
+        {
+            if (IsIncomeExpectedInMonth(income, year, month))
+            {
+                expectedIncome += income.Amount;
+                expectedIncomeItems.Add(income);
+            }
+        }
+
+        return new SummaryDashboardStats
+        {
+            TotalIncome = expectedIncome,
+            TotalExpenses = totalExpenses,
+            ExpectedIncomes = expectedIncomeItems
+        };
+    }
+
+    private bool IsIncomeExpectedInMonth(IncomeSource income, int targetYear, int targetMonth)
+    {
+        // A simplistic approach to recurring frequency mappings.
+        // It determines if the income event "falls" into the target year/month combination.
+
+        if (income.TargetDate.Year > targetYear || 
+           (income.TargetDate.Year == targetYear && income.TargetDate.Month > targetMonth))
+        {
+            // The income hasn't started yet.
+            return false;
+        }
+
+        switch (income.Frequency)
+        {
+            case IncomeFrequency.Monthly:
+                return true; // Happens every month after start
+                
+            case IncomeFrequency.BiWeekly:
+                 // Assuming 2 times a month strictly for standard monthly budgeting
+                 return true; 
+                 
+            case IncomeFrequency.Quarterly:
+                // Check if the target month is on the same quarterly cycle as the start month
+                int monthsDifference = ((targetYear - income.TargetDate.Year) * 12) + targetMonth - income.TargetDate.Month;
+                return monthsDifference % 3 == 0;
+                
+            case IncomeFrequency.Yearly:
+                return income.TargetDate.Month == targetMonth;
+                
+            default:
+                return false;
+        }
+    }
+}
