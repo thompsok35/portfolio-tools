@@ -25,4 +25,6 @@ public class IncomeSource
     public DateTime TargetDate { get; set; }
     
     public string Description { get; set; } = string.Empty;
+
+    public Guid PlanId { get; set; }
 }

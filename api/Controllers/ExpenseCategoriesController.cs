@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace api.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ExpenseCategoriesController : ControllerBase
@@ -17,9 +20,11 @@ public class ExpenseCategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ExpenseCategory>>> GetExpenseCategories()
+    public async Task<ActionResult<IEnumerable<ExpenseCategory>>> GetExpenseCategories([FromQuery] Guid planId)
     {
-        return await _context.ExpenseCategories.ToListAsync();
+        return await _context.ExpenseCategories
+            .Where(e => e.PlanId == planId)
+            .ToListAsync();
     }
 
     [HttpGet("{id}")]

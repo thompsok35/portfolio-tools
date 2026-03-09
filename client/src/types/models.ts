@@ -1,4 +1,11 @@
 export type IncomeFrequency = 0 | 1 | 2 | 3; // BiWeekly, Monthly, Quarterly, Yearly
+export type ExpenseFrequency = 0 | 1 | 2 | 3; // OneTime, Monthly, Quarterly, Yearly
+
+export interface Plan {
+    id: string;
+    name: string;
+    createdAt: string;
+}
 
 export interface IncomeSource {
     id: string;
@@ -8,6 +15,7 @@ export interface IncomeSource {
     frequency: IncomeFrequency;
     targetDate: string; // ISO 8601 string from backend
     description: string;
+    planId: string;
 }
 
 export interface ExpenseCategory {
@@ -15,6 +23,9 @@ export interface ExpenseCategory {
     name: string;
     isFixed: boolean;
     plannedAmount: number;
+    frequency: ExpenseFrequency;
+    targetDate: string; // ISO 8601 string
+    planId: string;
 }
 
 export interface AppConfigCategory {

@@ -1,5 +1,13 @@
 namespace api.Models;
 
+public enum ExpenseFrequency
+{
+    OneTime,
+    Monthly,
+    Quarterly,
+    Yearly
+}
+
 public class ExpenseCategory
 {
     public Guid Id { get; set; }
@@ -10,4 +18,10 @@ public class ExpenseCategory
     public bool IsFixed { get; set; }
     
     public decimal PlannedAmount { get; set; }
+
+    public ExpenseFrequency Frequency { get; set; }
+    
+    public DateTime TargetDate { get; set; }
+
+    public Guid PlanId { get; set; }
 }

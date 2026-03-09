@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<IncomeSource> IncomeSources { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
     public DbSet<AppConfigCategory> AppConfigCategories { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Plan> Plans { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

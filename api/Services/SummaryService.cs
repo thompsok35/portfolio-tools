@@ -21,14 +21,26 @@ public class SummaryService
         _context = context;
     }
 
-    public async Task<SummaryDashboardStats> GetMonthlySummaryAsync(int year, int month)
+    public async Task<SummaryDashboardStats> GetMonthlySummaryAsync(int year, int month, Guid planId)
     {
-        // 1. Calculate Total Foundational Expenses
-        // For simplicity, we assume fixed expenses are expected every month.
-        var totalExpenses = await _context.ExpenseCategories.SumAsync(e => e.PlannedAmount);
+        // 1. Calculate Total Expected Expenses
+        var allExpenses = await _context.ExpenseCategories
+            .Where(e => e.PlanId == planId)
+            .ToListAsync();
+
+        decimal totalExpenses = 0;
+        foreach (var expense in allExpenses)
+        {
+            if (IsExpenseExpectedInMonth(expense, year, month))
+            {
+                totalExpenses += expense.PlannedAmount;
+            }
+        }
 
         // 2. Calculate Expected Income for the target month
-        var allIncome = await _context.IncomeSources.ToListAsync();
+        var allIncome = await _context.IncomeSources
+            .Where(i => i.PlanId == planId)
+            .ToListAsync();
         
         decimal expectedIncome = 0;
 
@@ -79,6 +91,34 @@ public class SummaryService
                 
             case IncomeFrequency.Yearly:
                 return income.TargetDate.Month == targetMonth;
+                
+            default:
+                return false;
+        }
+    }
+
+    private bool IsExpenseExpectedInMonth(ExpenseCategory expense, int targetYear, int targetMonth)
+    {
+        if (expense.TargetDate.Year > targetYear || 
+           (expense.TargetDate.Year == targetYear && expense.TargetDate.Month > targetMonth))
+        {
+            return false;
+        }
+
+        switch (expense.Frequency)
+        {
+            case ExpenseFrequency.OneTime:
+                return expense.TargetDate.Year == targetYear && expense.TargetDate.Month == targetMonth;
+
+            case ExpenseFrequency.Monthly:
+                return true; 
+                 
+            case ExpenseFrequency.Quarterly:
+                int monthsDifference = ((targetYear - expense.TargetDate.Year) * 12) + targetMonth - expense.TargetDate.Month;
+                return monthsDifference % 3 == 0;
+                
+            case ExpenseFrequency.Yearly:
+                return expense.TargetDate.Month == targetMonth;
                 
             default:
                 return false;

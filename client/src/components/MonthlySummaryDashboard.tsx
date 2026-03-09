@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface MonthlySummaryProps {
     year: number;
@@ -8,9 +9,12 @@ interface MonthlySummaryProps {
 }
 
 export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) => {
+    const { activePlanId } = useAuth();
+
     const { data: summary, isLoading, error } = useQuery({
-        queryKey: ['monthlySummary', year, month],
-        queryFn: () => apiClient.getMonthlySummary(year, month),
+        queryKey: ['monthlySummary', year, month, activePlanId],
+        queryFn: () => activePlanId ? apiClient.getMonthlySummary(year, month, activePlanId) : Promise.resolve(null),
+        enabled: !!activePlanId,
     });
 
     if (isLoading) return <div className="text-center p-8 text-color-text-muted">Loading summary...</div>;
@@ -34,10 +38,10 @@ export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) =>
                 </div>
             </div>
 
-            {/* Foundational Expenses */}
+            {/* Expenses */}
             <div className="bg-color-surface rounded-xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-medium text-color-text-muted mb-1">Foundational Expenses</p>
+                    <p className="text-sm font-medium text-color-text-muted mb-1">Expenses</p>
                     <h3 className="text-3xl font-bold text-color-text-main">
                         ${summary?.totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>

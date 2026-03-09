@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Models;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace api.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class AppConfigController : ControllerBase
