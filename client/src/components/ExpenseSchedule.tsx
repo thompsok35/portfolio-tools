@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
-import { DollarSign, WalletCards, Edit2, Trash2 } from 'lucide-react';
+import { DollarSign, WalletCards, Edit2, Trash2, Link, Key, User } from 'lucide-react';
 import { useState } from 'react';
 import { ExpenseForm } from './ExpenseForm';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutGrid, List } from 'lucide-react';
+import { LayoutGrid, List as ListIcon } from 'lucide-react';
 
 export const ExpenseSchedule = () => {
     const { activePlanId } = useAuth();
@@ -12,6 +12,8 @@ export const ExpenseSchedule = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+    const [revealingPasswordId, setRevealingPasswordId] = useState<string | null>(null);
+    const [revealedPasswords, setRevealedPasswords] = useState<Record<string, string>>({});
 
     const { data: expenses, isLoading, error } = useQuery({
         queryKey: ['expenseCategories', activePlanId],
@@ -34,6 +36,27 @@ export const ExpenseSchedule = () => {
     const handleConfirmDelete = (id: string) => {
         deleteMutation.mutate(id);
         setDeletingId(null);
+    };
+
+    const handleRevealPassword = async (id: string) => {
+        if (revealedPasswords[id] !== undefined) {
+            // Toggle off
+            const next = { ...revealedPasswords };
+            delete next[id];
+            setRevealedPasswords(next);
+            return;
+        }
+
+        try {
+            setRevealingPasswordId(id);
+            const res = await apiClient.getExpensePassword(id);
+            setRevealedPasswords(prev => ({ ...prev, [id]: res.password }));
+        } catch (err) {
+            console.error(err);
+            alert("Failed to retrieve decrypted password.");
+        } finally {
+            setRevealingPasswordId(null);
+        }
     };
 
     if (isLoading) return <div className="text-center p-8 text-color-text-muted">Loading expenses...</div>;
@@ -61,7 +84,7 @@ export const ExpenseSchedule = () => {
                         className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700'}`}
                         title="List View"
                     >
-                        <List className="h-4 w-4" />
+                        <ListIcon className="h-4 w-4" />
                     </button>
                 </div>
             </div>
@@ -145,11 +168,83 @@ export const ExpenseSchedule = () => {
                                             ${expense.plannedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </span>
                                     </div>
+
+                                    {(expense.websiteUrl || expense.userName || expense.encryptedPassword === "***") && (
+                                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-100 flex-wrap">
+                                            {expense.websiteUrl && (
+                                                <a
+                                                    href={expense.websiteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors mr-2"
+                                                >
+                                                    <Link className="h-3.5 w-3.5" />
+                                                    Visit Site
+                                                </a>
+                                            )}
+                                            {expense.userName && (
+                                                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded mr-2">
+                                                    <User className="h-3.5 w-3.5" />
+                                                    {expense.userName}
+                                                </div>
+                                            )}
+                                            {expense.encryptedPassword === "***" && (
+                                                <div className="flex items-center gap-2 ml-auto">
+                                                    <button
+                                                        onClick={() => handleRevealPassword(expense.id)}
+                                                        disabled={revealingPasswordId === expense.id}
+                                                        className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+                                                    >
+                                                        <Key className="h-3 w-3" />
+                                                        {revealedPasswords[expense.id] !== undefined ? 'Hide Key' : 'Reveal Key'}
+                                                    </button>
+                                                    {revealedPasswords[expense.id] !== undefined && (
+                                                        <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-color-text-main border border-slate-200">
+                                                            {revealedPasswords[expense.id] || '(empty)'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="border border-slate-100 bg-slate-50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
-                                    <div className="flex-1 font-semibold text-color-text-main truncate pr-4">
-                                        {expense.name}
+                                    <div className="flex-1 font-semibold text-color-text-main min-w-0 pr-4 flex items-center gap-2">
+                                        <span className="truncate">{expense.name}</span>
+                                        {expense.websiteUrl && (
+                                            <a
+                                                href={expense.websiteUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 hover:text-blue-700 shrink-0"
+                                                title="Open Website"
+                                            >
+                                                <Link className="h-4 w-4" />
+                                            </a>
+                                        )}
+                                        {expense.userName && (
+                                            <span
+                                                className="text-slate-500 shrink-0 flex items-center gap-1"
+                                                title={`Username: ${expense.userName}`}
+                                            >
+                                                <User className="h-4 w-4" />
+                                            </span>
+                                        )}
+                                        {expense.encryptedPassword === "***" && (
+                                            <button
+                                                onClick={() => handleRevealPassword(expense.id)}
+                                                className={`shrink-0 transition-colors ${revealedPasswords[expense.id] !== undefined ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                                title={revealedPasswords[expense.id] !== undefined ? "Hide Password" : "Retrieve Password"}
+                                            >
+                                                <Key className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                        {revealedPasswords[expense.id] !== undefined && (
+                                            <span className="text-xs font-mono bg-white px-2 py-0.5 rounded text-color-text-main border border-slate-200 shrink-0 shadow-sm ml-2">
+                                                {revealedPasswords[expense.id] || '(empty)'}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="text-sm text-color-text-muted hidden md:block w-32 shrink-0">
                                         Starts: {new Date(expense.targetDate).toLocaleDateString()}

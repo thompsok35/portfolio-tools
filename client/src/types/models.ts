@@ -25,6 +25,9 @@ export interface ExpenseCategory {
     plannedAmount: number;
     frequency: ExpenseFrequency;
     targetDate: string; // ISO 8601 string
+    websiteUrl?: string;
+    userName?: string;
+    encryptedPassword?: string;
     planId: string;
 }
 

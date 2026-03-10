@@ -128,6 +128,12 @@ export const apiClient = {
         if (!res.ok) throw new Error('Failed to delete expense category');
     },
 
+    getExpensePassword: async (id: string): Promise<{ password: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/ExpenseCategories/${id}/password`);
+        if (!res.ok) throw new Error('Failed to retrieve decrypted password');
+        return res.json();
+    },
+
     // Summaries
     getMonthlySummary: async (year: number, month: number, planId: string): Promise<SummaryDashboardStats> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/Summary/${year}/${month}?planId=${planId}`);

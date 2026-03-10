@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
 import { useState } from 'react';
 import type { ExpenseCategory } from '../types/models';
@@ -25,6 +25,15 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
         targetDate: initialData?.targetDate
             ? new Date(initialData.targetDate).toISOString().split('T')[0]
             : new Date().toISOString().split('T')[0],
+        websiteUrl: initialData?.websiteUrl || '',
+        userName: initialData?.userName || '',
+        encryptedPassword: initialData?.encryptedPassword || '',
+        planId: initialData?.planId || activePlanId || '',
+    });
+
+    const { data: plans } = useQuery({
+        queryKey: ['plans'],
+        queryFn: apiClient.getPlans
     });
 
     const mutation = useMutation({
@@ -47,7 +56,11 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     plannedAmount: '',
                     isFixed: true,
                     frequency: 1,
-                    targetDate: new Date().toISOString().split('T')[0]
+                    targetDate: new Date().toISOString().split('T')[0],
+                    websiteUrl: '',
+                    userName: '',
+                    encryptedPassword: '',
+                    planId: activePlanId || ''
                 });
             }
         }
@@ -62,7 +75,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
         mutation.mutate({
             ...formData,
-            planId: activePlanId,
+            planId: formData.planId || activePlanId,
             plannedAmount: parseFloat(formData.plannedAmount),
             frequency: parseInt(formData.frequency.toString()),
             targetDate: new Date(formData.targetDate).toISOString()
@@ -141,6 +154,21 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     </select>
                 </div>
 
+                {isEditMode && plans && plans.length > 0 && (
+                    <div>
+                        <label className="block text-sm font-medium text-color-text-main mb-1">Assigned Plan</label>
+                        <select
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                            value={formData.planId}
+                            onChange={e => setFormData({ ...formData, planId: e.target.value })}
+                        >
+                            {plans.map(p => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <div>
                     <label className="block text-sm font-medium text-color-text-main mb-1">Start Date</label>
                     <input
@@ -149,6 +177,45 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                         value={formData.targetDate}
                         onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
                     />
+                </div>
+
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4 mt-2">
+                    <div className="min-w-0">
+                        <label className="block text-sm font-medium text-color-text-main mb-1 truncate" title="Website URL (Optional)">Website URL (Opt)</label>
+                        <input
+                            type="url"
+                            placeholder="https://..."
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            value={formData.websiteUrl}
+                            onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="min-w-0">
+                        <label className="block text-sm font-medium text-color-text-main mb-1 truncate" title="User Name (Optional)">User Name (Opt)</label>
+                        <input
+                            type="text"
+                            placeholder="Login ID or Email"
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            value={formData.userName}
+                            onChange={e => setFormData({ ...formData, userName: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="min-w-0">
+                        <label className="block text-sm font-medium text-color-text-main mb-1 truncate" title="Account Password (Optional)">Password (Opt)</label>
+                        <input
+                            type="password"
+                            autoComplete="new-password"
+                            placeholder={isEditMode && initialData?.encryptedPassword === "***" ? "********" : "Enter password"}
+                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            value={formData.encryptedPassword === "***" ? "" : formData.encryptedPassword}
+                            onChange={e => setFormData({ ...formData, encryptedPassword: e.target.value })}
+                        />
+                        {isEditMode && initialData?.encryptedPassword === "***" && (
+                            <p className="text-xs text-slate-500 mt-1 truncate" title="Leave blank to keep existing password.">Leave blank to keep existing.</p>
+                        )}
+                    </div>
                 </div>
             </div>
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Data;
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309200812_AddExpenseCredentials")]
+    partial class AddExpenseCredentials
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,9 +92,6 @@ namespace api.Migrations
                     b.Property<DateTime>("TargetDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("text");
-
                     b.Property<string>("WebsiteUrl")
                         .HasColumnType("text");
 
@@ -102,7 +102,7 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d910cf12-d88c-4218-8ebb-fb135115ceb9"),
+                            Id = new Guid("a1393079-4b8e-41ca-9bf9-1de6a43b48c3"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Rent/Mortgage",
@@ -112,7 +112,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("98ec69b1-ef1b-4eac-93d0-eddedeeb5f71"),
+                            Id = new Guid("babf7d6a-6883-487c-8863-51083236e96c"),
                             Frequency = 0,
                             IsFixed = false,
                             Name = "Groceries",
@@ -122,7 +122,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("1f9b1e53-0e72-4b98-9e15-f7c4cbd90de6"),
+                            Id = new Guid("2624cee0-cd6e-4f44-8c81-05caa828d9c2"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Healthcare",
