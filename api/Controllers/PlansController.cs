@@ -25,16 +25,24 @@ public class PlansController : ControllerBase
         return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
     }
 
+    private string GetUserEmail()
+    {
+        return User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Plan>>> GetPlans()
     {
         var userId = GetUserId();
+        var userEmail = GetUserEmail().ToLower();
         
         // Always include the default plan in case the user has legacy items
         var defaultPlanId = new Guid("00000000-0000-0000-0000-000000000000");
         
         return await _context.Plans
-            .Where(p => p.UserId == userId || p.Id == defaultPlanId)
+            .Where(p => p.UserId == userId 
+                || p.Id == defaultPlanId
+                || _context.PlanShares.Any(ps => ps.PlanId == p.Id && ps.SharedWithEmail.ToLower() == userEmail && ps.Status == "Active"))
             .OrderBy(p => p.CreatedAt)
             .ToListAsync();
     }

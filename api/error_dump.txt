@@ -1,0 +1,5 @@
+System.Security.Cryptography.CryptographicException: Specified key is not a valid size for this algorithm.
+   at System.Security.Cryptography.SymmetricAlgorithm.SetKey(ReadOnlySpan`1 key)
+   at System.Security.Cryptography.AesImplementation.set_Key(Byte[] value)
+   at api.Services.EncryptionService.Encrypt(String plainText) in C:\Users\thomp\.gemini\antigravity\playground\portfolio-tools\api\Services\EncryptionService.cs:line 26
+   at api.Controllers.ExpenseCategoriesController.PutExpenseCategory(Guid id, ExpenseCategory expenseCategory) in C:\Users\thomp\.gemini\antigravity\playground\portfolio-tools\api\Controllers\ExpenseCategoriesController.cs:line 116

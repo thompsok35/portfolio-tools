@@ -43,3 +43,33 @@ export interface SummaryDashboardStats {
     netSurplusDeficit: number;
     expectedIncomes: IncomeSource[];
 }
+
+export interface UserProfile {
+    id?: string;
+    userId?: string;
+    accountName?: string;
+}
+
+export interface PlanShare {
+    id?: string;
+    planId: string;
+    sharedWithEmail: string;
+    status: string;
+    createdAt?: string;
+}
+
+export interface PortfolioIntegration {
+    id?: string;
+    userId?: string;
+    planId: string;
+    nickname: string;
+    encryptedApiAccessToken: string;
+}
+
+export interface BankAccount {
+    id?: string;
+    userId?: string;
+    bankName: string;
+    accountName?: string;
+    accountType: string;
+}

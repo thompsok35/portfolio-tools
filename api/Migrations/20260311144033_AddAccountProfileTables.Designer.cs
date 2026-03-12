@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Data;
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311144033_AddAccountProfileTables")]
+    partial class AddAccountProfileTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,11 +69,6 @@ namespace api.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("AccountType")
                         .IsRequired()
@@ -131,7 +129,7 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2041a7cd-1fb4-414d-81cb-62d9ae1a882e"),
+                            Id = new Guid("49eb28c7-a9d1-4752-9142-a7ad802d04c3"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Rent/Mortgage",
@@ -141,7 +139,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("6b3c2c29-c28a-4338-8e8e-54e318b19f5f"),
+                            Id = new Guid("1d89b0a4-fdf3-4d92-a0e2-6290d745e7cf"),
                             Frequency = 0,
                             IsFixed = false,
                             Name = "Groceries",
@@ -151,7 +149,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("ed2a0b9f-68d3-4bf6-afc5-864729bfdbe0"),
+                            Id = new Guid("f595543d-2a7c-4844-b327-3079dce2b9db"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Healthcare",
@@ -217,33 +215,6 @@ namespace api.Migrations
                     b.ToTable("Plans");
                 });
 
-            modelBuilder.Entity("api.Models.PlanShare", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PlanId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SharedWithEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PlanShares");
-                });
-
             modelBuilder.Entity("api.Models.PortfolioIntegration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,6 +272,15 @@ namespace api.Migrations
                     b.Property<string>("AccountName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("SharedStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("SharedWithEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");

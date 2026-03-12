@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Models;
-
+using api.Models;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers;
@@ -21,9 +22,36 @@ public class ExpenseCategoriesController : ControllerBase
         _encryptionService = encryptionService;
     }
 
+    private Guid GetUserId()
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
+    }
+
+    private string GetUserEmail()
+    {
+        return User.FindFirstValue(ClaimTypes.Email)?.ToLower() ?? string.Empty;
+    }
+
+    private async Task<bool> HasPlanAccessAsync(Guid planId)
+    {
+        var userId = GetUserId();
+        var defaultPlanId = new Guid("00000000-0000-0000-0000-000000000000");
+        if (planId == defaultPlanId) return true;
+
+        var plan = await _context.Plans.AsNoTracking().FirstOrDefaultAsync(p => p.Id == planId);
+        if (plan == null) return false;
+        if (plan.UserId == userId) return true;
+
+        var userEmail = GetUserEmail();
+        return await _context.PlanShares.AnyAsync(ps => ps.PlanId == planId && ps.SharedWithEmail.ToLower() == userEmail && ps.Status == "Active");
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ExpenseCategory>>> GetExpenseCategories([FromQuery] Guid planId)
     {
+        if (!await HasPlanAccessAsync(planId)) return Forbid();
+
         var expenses = await _context.ExpenseCategories
             .Where(e => e.PlanId == planId)
             .AsNoTracking()
@@ -46,6 +74,8 @@ public class ExpenseCategoriesController : ControllerBase
         if (expenseCategory == null)
             return NotFound();
 
+        if (!await HasPlanAccessAsync(expenseCategory.PlanId)) return Forbid();
+
         if (!string.IsNullOrEmpty(expenseCategory.EncryptedPassword))
             expenseCategory.EncryptedPassword = "***";
 
@@ -57,6 +87,8 @@ public class ExpenseCategoriesController : ControllerBase
     {
         var expense = await _context.ExpenseCategories.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         if (expense == null) return NotFound();
+
+        if (!await HasPlanAccessAsync(expense.PlanId)) return Forbid();
 
         if (string.IsNullOrEmpty(expense.EncryptedPassword))
             return Ok(new { password = "" });
@@ -75,6 +107,8 @@ public class ExpenseCategoriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ExpenseCategory>> PostExpenseCategory(ExpenseCategory expenseCategory)
     {
+        if (!await HasPlanAccessAsync(expenseCategory.PlanId)) return Forbid();
+
         if (expenseCategory.Id == Guid.Empty)
             expenseCategory.Id = Guid.NewGuid();
 
@@ -102,6 +136,9 @@ public class ExpenseCategoriesController : ControllerBase
         var existing = await _context.ExpenseCategories.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         if (existing == null)
             return NotFound();
+
+        if (!await HasPlanAccessAsync(existing.PlanId)) return Forbid();
+        if (existing.PlanId != expenseCategory.PlanId && !await HasPlanAccessAsync(expenseCategory.PlanId)) return Forbid();
 
         if (expenseCategory.EncryptedPassword == "***")
         {
@@ -144,6 +181,8 @@ public class ExpenseCategoriesController : ControllerBase
         {
             return NotFound();
         }
+
+        if (!await HasPlanAccessAsync(expenseCategory.PlanId)) return Forbid();
 
         _context.ExpenseCategories.Remove(expenseCategory);
         await _context.SaveChangesAsync();

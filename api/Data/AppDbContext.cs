@@ -14,6 +14,10 @@ public class AppDbContext : DbContext
     public DbSet<AppConfigCategory> AppConfigCategories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Plan> Plans { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<PortfolioIntegration> PortfolioIntegrations { get; set; }
+    public DbSet<BankAccount> BankAccounts { get; set; }
+    public DbSet<PlanShare> PlanShares { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

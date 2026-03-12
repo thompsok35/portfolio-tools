@@ -1,4 +1,4 @@
-import type { AppConfigCategory, ExpenseCategory, IncomeSource, SummaryDashboardStats, Plan } from '../types/models';
+import type { AppConfigCategory, ExpenseCategory, IncomeSource, SummaryDashboardStats, Plan, UserProfile, PortfolioIntegration, BankAccount } from '../types/models';
 
 const API_BASE_URL = 'http://localhost:5031/api'; // Standard ASP.NET Core dev port, can adjust based on launchSettings
 
@@ -146,5 +146,97 @@ export const apiClient = {
         const res = await fetchWithAuth(`${API_BASE_URL}/AppConfig/${group}`);
         if (!res.ok) throw new Error(`Failed to fetch config group: ${group}`);
         return res.json();
+    },
+
+    // Account Profile (General)
+    getProfile: async (): Promise<UserProfile> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Profile`);
+        if (!res.ok) throw new Error('Failed to fetch user profile');
+        return res.json();
+    },
+
+    updateProfile: async (data: UserProfile): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Profile`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to update user profile');
+    },
+
+    verifySharedEmail: async (): Promise<{ status: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Profile/verify-email`, {
+            method: 'POST'
+        });
+        if (!res.ok) throw new Error('Failed to verify shared email');
+        return res.json();
+    },
+
+    // Plan Shares
+    getPlanShares: async (planId: string): Promise<any[]> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/PlanShares/${planId}`);
+        if (!res.ok) throw new Error('Failed to fetch plan shares');
+        return res.json();
+    },
+
+    createPlanShare: async (planId: string, sharedWithEmail: string): Promise<any> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/PlanShares`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planId, sharedWithEmail, status: 'Active' })
+        });
+        if (!res.ok) throw new Error('Failed to create plan share');
+        return res.json();
+    },
+
+    deletePlanShare: async (id: string): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/PlanShares/${id}`, {
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error('Failed to delete plan share');
+    },
+
+    // Integrations
+    getIntegrations: async (): Promise<PortfolioIntegration[]> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations`);
+        if (!res.ok) throw new Error('Failed to fetch integrations');
+        return res.json();
+    },
+
+    createIntegration: async (data: Omit<PortfolioIntegration, 'id'>): Promise<PortfolioIntegration> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to create integration');
+        return res.json();
+    },
+
+    deleteIntegration: async (id: string): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete integration');
+    },
+
+    // Bank Accounts
+    getBankAccounts: async (): Promise<BankAccount[]> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/BankAccounts`);
+        if (!res.ok) throw new Error('Failed to fetch bank accounts');
+        return res.json();
+    },
+
+    createBankAccount: async (data: Omit<BankAccount, 'id'>): Promise<BankAccount> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/BankAccounts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to create bank account');
+        return res.json();
+    },
+
+    deleteBankAccount: async (id: string): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/BankAccounts/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete bank account');
     }
 };

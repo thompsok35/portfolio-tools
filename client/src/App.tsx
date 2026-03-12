@@ -1,5 +1,5 @@
 import { format, addMonths, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MonthlySummaryDashboard } from './components/MonthlySummaryDashboard';
@@ -10,6 +10,7 @@ import { Login } from './components/Login';
 import { PlanSelector } from './components/PlanSelector';
 import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseSchedule } from './components/ExpenseSchedule';
+import { AccountProfileModal } from './components/AccountProfileModal';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -25,6 +26,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function Dashboard() {
   const { logout, email } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handlePreviousMonth = () => setCurrentDate(subMonths(currentDate, 1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
@@ -63,6 +65,13 @@ function Dashboard() {
             <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
               <span className="text-sm font-medium text-color-text-muted hidden md:block">{email}</span>
               <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="p-2 text-color-text-muted hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
+                title="Account Settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+              <button
                 onClick={logout}
                 className="p-2 text-color-text-muted hover:text-color-danger hover:bg-red-50 rounded-full transition-colors"
                 title="Sign out"
@@ -88,6 +97,10 @@ function Dashboard() {
           <ExpenseSchedule />
         </div>
 
+        <AccountProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+        />
       </div>
     </div>
   );
