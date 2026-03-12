@@ -55,23 +55,23 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
     const expectedIncomes = summary?.expectedIncomes || [];
 
     return (
-        <div className="bg-color-surface rounded-xl shadow-sm border border-slate-200 p-6 min-h-[400px]">
+        <div className="bg-color-surface rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 min-h-[400px]">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-color-text-main flex items-center gap-2">
                     <CalendarDays className="h-5 w-5 text-color-primary" />
                     Expected Income Schedule
                 </h2>
-                <div className="flex items-center bg-slate-100 rounded-lg p-1">
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                     <button
                         onClick={() => setViewMode('cards')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                         title="Card View"
                     >
                         <LayoutGrid className="h-4 w-4" />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                         title="List View"
                     >
                         <List className="h-4 w-4" />
@@ -80,7 +80,7 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
             </div>
 
             {expectedIncomes.length === 0 ? (
-                <div className="text-center p-12 text-color-text-muted border-2 border-dashed border-slate-200 rounded-lg">
+                <div className="text-center p-12 text-color-text-muted border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
                     No expected income for this period. Use the form above to register recurring items.
                 </div>
             ) : (
@@ -116,20 +116,20 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     onCancel={() => setEditingId(null)}
                                 />
                             ) : viewMode === 'cards' ? (
-                                <div className="border border-slate-100 bg-slate-50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
+                                <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
                                     <div className="flex justify-between items-start mb-3">
                                         <h4 className="font-semibold text-color-text-main pr-16">{income.source}</h4>
                                         <div className="absolute top-4 right-4 flex gap-1">
                                             <button
                                                 onClick={() => setEditingId(income.id)}
-                                                className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 rounded-md transition-all"
+                                                className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                                 title="Edit Income"
                                             >
                                                 <Edit2 className="h-4 w-4" />
                                             </button>
                                             <button
                                                 onClick={() => setDeletingId(income.id)}
-                                                className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 rounded-md transition-all"
+                                                className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                                 title="Delete Income"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -138,7 +138,7 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     </div>
 
                                     <div className="mb-3">
-                                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block">
+                                        <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block">
                                             {income.type}
                                         </span>
                                     </div>
@@ -156,13 +156,13 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     </div>
 
                                     {income.description && (
-                                        <p className="text-sm text-color-text-muted mt-3 pt-3 border-t border-slate-200">
+                                        <p className="text-sm text-color-text-muted mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
                                             {income.description}
                                         </p>
                                     )}
                                 </div>
                             ) : (
-                                <div className="border border-slate-100 bg-slate-50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
+                                <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
                                     <div className="flex-1 font-semibold text-color-text-main truncate pr-4">
                                         {income.source}
                                         {income.description && (
@@ -177,14 +177,14 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     <div className="flex gap-1 shrink-0 ml-2">
                                         <button
                                             onClick={() => setEditingId(income.id)}
-                                            className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 rounded-md transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                             title="Edit Income"
                                         >
                                             <Edit2 className="h-4 w-4" />
                                         </button>
                                         <button
                                             onClick={() => setDeletingId(income.id)}
-                                            className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 rounded-md transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                             title="Delete Income"
                                         >
                                             <Trash2 className="h-4 w-4" />

@@ -87,7 +87,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-color-surface p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
+        <form onSubmit={handleSubmit} className="bg-color-surface p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
             <h3 className="text-lg font-semibold mb-4 text-color-text-main">
                 {isEditMode ? 'Edit Income Source' : 'Record New Income Source'}
             </h3>
@@ -98,7 +98,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                     <input
                         type="text" required
                         placeholder="e.g. Apple Dividends"
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.source}
                         onChange={e => setFormData({ ...formData, source: e.target.value })}
                     />
@@ -108,7 +108,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                     <label className="block text-sm font-medium text-color-text-main mb-1">Expected Amount</label>
                     <input
                         type="number" step="0.01" required
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.amount}
                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
                     />
@@ -117,7 +117,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                 <div>
                     <label className="block text-sm font-medium text-color-text-main mb-1">Income Type</label>
                     <select
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                         value={formData.type}
                         onChange={e => setFormData({ ...formData, type: e.target.value })}
                     >
@@ -135,7 +135,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                 <div>
                     <label className="block text-sm font-medium text-color-text-main mb-1">Frequency</label>
                     <select
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                         value={formData.frequency}
                         onChange={e => setFormData({ ...formData, frequency: parseInt(e.target.value) as IncomeFrequency })}
                     >
@@ -150,7 +150,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                     <label className="block text-sm font-medium text-color-text-main mb-1">Target Date</label>
                     <input
                         type="date" required
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.targetDate}
                         onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
                     />

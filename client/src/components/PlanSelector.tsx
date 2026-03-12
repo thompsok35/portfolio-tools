@@ -41,12 +41,12 @@ export const PlanSelector = () => {
     };
 
     if (isLoading) {
-        return <div className="animate-pulse h-10 bg-slate-100 rounded-lg w-48 border border-slate-200" />;
+        return <div className="animate-pulse h-10 bg-slate-100 dark:bg-slate-800 rounded-lg w-48 border border-slate-200 dark:border-slate-700" />;
     }
 
     if (isCreating) {
         return (
-            <form onSubmit={handleCreateSubmit} className="flex items-center gap-2 bg-white rounded-lg p-1 border border-color-primary shadow-sm">
+            <form onSubmit={handleCreateSubmit} className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-lg p-1 border border-color-primary shadow-sm">
                 <input
                     autoFocus
                     type="text"
@@ -76,7 +76,7 @@ export const PlanSelector = () => {
     }
 
     return (
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-1.5 shadow-sm">
+        <div className="flex items-center gap-3 bg-color-surface border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 shadow-sm">
             <div className="flex items-center gap-2 pl-3">
                 <Folder className="h-4 w-4 text-color-primary" />
                 <span className="text-sm font-medium text-color-text-muted hidden sm:inline">Active Plan:</span>
@@ -85,7 +85,7 @@ export const PlanSelector = () => {
             <select
                 value={activePlanId || ''}
                 onChange={(e) => setActivePlan(e.target.value)}
-                className="bg-transparent border-none text-sm font-semibold text-color-text-main pr-8 focus:ring-0 cursor-pointer"
+                className="bg-transparent border-none text-sm font-semibold text-color-text-main pr-8 focus:ring-0 cursor-pointer [&>option]:bg-color-surface [&>option]:text-color-text-main"
             >
                 {plans?.map((plan) => (
                     <option key={plan.id} value={plan.id}>
@@ -94,10 +94,10 @@ export const PlanSelector = () => {
                 ))}
             </select>
 
-            <div className="border-l border-slate-200 pl-1.5">
+            <div className="border-l border-slate-200 dark:border-slate-700 pl-1.5">
                 <button
                     onClick={() => setIsCreating(true)}
-                    className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-50 rounded-md transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-md transition-colors"
                     title="Create New Plan"
                 >
                     <Plus className="h-4 w-4" />

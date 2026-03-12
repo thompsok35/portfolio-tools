@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
     --color-color-primary: #3b82f6;
     --color-color-primary-hover: #2563eb;
@@ -16,4 +18,16 @@ body {
     background-color: var(--color-background);
     color: var(--color-text-main);
     font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Dark mode overrides for semantic colors */
+.dark {
+    --color-color-background: #020617;
+    /* slate-950 */
+    --color-color-surface: #0f172a;
+    /* slate-900 */
+    --color-color-text-main: #f8fafc;
+    /* slate-50 */
+    --color-color-text-muted: #94a3b8;
+    /* slate-400 */
 }

@@ -11,6 +11,7 @@ import { PlanSelector } from './components/PlanSelector';
 import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseSchedule } from './components/ExpenseSchedule';
 import { AccountProfileModal } from './components/AccountProfileModal';
+import { ThemeToggle } from './components/ThemeToggle';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -41,39 +42,40 @@ function Dashboard() {
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-color-text-main flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-400 dark:to-cyan-300 bg-clip-text text-transparent flex items-center gap-3 pb-1">
               Income & Expense Planner
             </h1>
-            <p className="text-color-text-muted mt-1">Track expected income against foundational expenses.</p>
+            <p className="text-base font-medium text-color-text-muted mt-1">Track expected income against expenses.</p>
           </div>
 
           <div className="flex items-center gap-6">
             <PlanSelector />
 
-            <div className="flex items-center gap-4 bg-color-surface px-4 py-2 rounded-lg shadow-sm border border-slate-200">
-              <button onClick={handlePreviousMonth} className="p-1 hover:bg-slate-100 rounded-full transition-colors">
+            <div className="flex items-center gap-4 bg-color-surface px-4 py-2 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+              <button onClick={handlePreviousMonth} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <ChevronLeft className="h-5 w-5 text-color-text-main" />
               </button>
-              <span className="font-semibold text-lg min-w-[140px] text-center">
+              <span className="font-semibold text-lg min-w-[140px] text-center text-color-text-main">
                 {format(currentDate, 'MMMM yyyy')}
               </span>
-              <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 rounded-full transition-colors">
+              <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <ChevronRight className="h-5 w-5 text-color-text-main" />
               </button>
             </div>
 
-            <div className="flex items-center gap-3 border-l pl-6 border-slate-200">
+            <div className="flex items-center gap-3 border-l pl-6 border-slate-200 dark:border-slate-800">
               <span className="text-sm font-medium text-color-text-muted hidden md:block">{email}</span>
+              <ThemeToggle />
               <button
                 onClick={() => setIsProfileModalOpen(true)}
-                className="p-2 text-color-text-muted hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 text-color-text-muted hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                 title="Account Settings"
               >
                 <Settings className="h-5 w-5" />
               </button>
               <button
                 onClick={logout}
-                className="p-2 text-color-text-muted hover:text-color-danger hover:bg-red-50 rounded-full transition-colors"
+                className="p-2 text-color-text-muted hover:text-color-danger hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full transition-colors"
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5" />

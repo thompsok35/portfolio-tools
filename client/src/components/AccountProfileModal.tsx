@@ -179,20 +179,20 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="bg-color-surface rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                    <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+                    <h2 className="text-xl font-semibold text-color-text-main flex items-center gap-2">
                         <User className="w-5 h-5 text-indigo-600" />
                         Account Profile
                     </h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">
+                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs Container */}
-                <div className="flex border-b border-slate-200 px-6">
+                <div className="flex border-b border-slate-200 dark:border-slate-800 px-6">
                     <button
                         onClick={() => setActiveTab('General')}
                         className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'General'
@@ -233,21 +233,21 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                         <div className="space-y-8">
                             {/* Base Profile Details */}
                             <form onSubmit={handleProfileSubmit} className="space-y-4">
-                                <h3 className="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2">Profile Information</h3>
+                                <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2">Profile Information</h3>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Account Name</label>
+                                    <label className="block text-sm font-medium text-color-text-main mb-1">Account Name</label>
                                     <input
                                         type="text"
                                         value={accountName}
                                         onChange={(e) => setAccountName(e.target.value)}
-                                        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Enter your account name"
                                     />
                                 </div>
                                 <button
                                     type="submit"
                                     disabled={updateProfileMutation.isPending}
-                                    className="w-full flex justify-center items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 hover:bg-slate-200 transition duration-200"
+                                    className="w-full flex justify-center items-center gap-2 bg-slate-100 dark:bg-slate-800/50 text-color-text-main px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition duration-200"
                                 >
                                     {updateProfileMutation.isPending ? 'Saving...' : 'Update Name'}
                                 </button>
@@ -255,13 +255,13 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
 
                             {/* Plan Sharing Details */}
                             <div className="space-y-4 pt-2">
-                                <h3 className="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2">Plan Access Control</h3>
+                                <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2">Plan Access Control</h3>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Select Plan Scope</label>
+                                    <label className="block text-sm font-medium text-color-text-main mb-1">Select Plan Scope</label>
                                     <select
                                         value={sharePlanId}
                                         onChange={(e) => setSharePlanId(e.target.value)}
-                                        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-900"
                                     >
                                         {plans.map(p => (
                                             <option key={p.id} value={p.id}>{p.name}</option>
@@ -271,12 +271,12 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
 
                                 {planShares.length > 0 && (
                                     <div className="space-y-2">
-                                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Active Invites</div>
+                                        <div className="text-xs font-semibold text-color-text-muted uppercase tracking-wider mb-2">Active Invites</div>
                                         {planShares.map(share => (
-                                            <div key={share.id} className="flex flex-row justify-between items-center bg-slate-50 border border-slate-200 p-2 rounded-lg">
+                                            <div key={share.id} className="flex flex-row justify-between items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2 rounded-lg">
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-slate-800">{share.sharedWithEmail}</span>
-                                                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                    <span className="text-sm font-medium text-color-text-main">{share.sharedWithEmail}</span>
+                                                    <span className="text-xs text-color-text-muted flex items-center gap-1">
                                                         <CheckCircle className="w-3 h-3 text-emerald-500" /> {share.status}
                                                     </span>
                                                 </div>
@@ -297,7 +297,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                         type="email"
                                         value={planShareEmail}
                                         onChange={(e) => setPlanShareEmail(e.target.value)}
-                                        className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="flex-1 bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="collaborator@example.com"
                                         required
                                     />
@@ -321,13 +321,13 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                             {/* Vault List */}
                             {integrations.length > 0 && (
                                 <div className="space-y-3">
-                                    <h3 className="text-sm font-semibold text-slate-800">Active Integrations</h3>
+                                    <h3 className="text-sm font-semibold text-color-text-main">Active Integrations</h3>
                                     <div className="space-y-2">
                                         {integrations.map((integration) => (
-                                            <div key={integration.id} className="flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+                                            <div key={integration.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                                                 <div>
-                                                    <div className="font-medium text-slate-800">{integration.nickname}</div>
-                                                    <div className="text-xs text-slate-500 font-mono tracking-widest">{integration.encryptedApiAccessToken}</div>
+                                                    <div className="font-medium text-color-text-main">{integration.nickname}</div>
+                                                    <div className="text-xs text-color-text-muted font-mono tracking-widest">{integration.encryptedApiAccessToken}</div>
                                                 </div>
                                                 <button
                                                     onClick={() => integration.id && deleteIntegrationMutation.mutate(integration.id)}
@@ -343,30 +343,30 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                             )}
 
                             {/* Add New Integration */}
-                            <form onSubmit={handleIntegrationSubmit} className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-4">
-                                <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <form onSubmit={handleIntegrationSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+                                <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
                                     <Plus className="w-4 h-4 text-indigo-600" />
                                     Portfolio Manager Add-On
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Nickname</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Nickname</label>
                                         <input
                                             type="text"
                                             value={nickname}
                                             onChange={(e) => setNickname(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="e.g. Robinhood API"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Select Planner</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Select Planner</label>
                                         <select
                                             value={integrationPlanId}
                                             onChange={(e) => setIntegrationPlanId(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-900"
                                             required
                                         >
                                             {plans.map(p => (
@@ -375,13 +375,13 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                         </select>
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Secure API Access Token</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Secure API Access Token</label>
                                         <input
                                             type="password"
                                             value={apiToken}
                                             autoComplete="new-password"
                                             onChange={(e) => setApiToken(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
                                             placeholder="Paste secret token..."
                                             required
                                         />
@@ -391,7 +391,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                 <button
                                     type="submit"
                                     disabled={createIntegrationMutation.isPending || plans.length === 0}
-                                    className="w-full bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition duration-200"
+                                    className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
                                 >
                                     {createIntegrationMutation.isPending ? 'Securing...' : 'Encrypt & Save Token'}
                                 </button>
@@ -406,18 +406,18 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                             {/* Existing Banks List */}
                             {bankAccounts.length > 0 && (
                                 <div className="space-y-3">
-                                    <h3 className="text-sm font-semibold text-slate-800">Linked Accounts</h3>
+                                    <h3 className="text-sm font-semibold text-color-text-main">Linked Accounts</h3>
                                     <div className="space-y-2">
                                         {bankAccounts.map((account) => (
-                                            <div key={account.id} className="flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+                                            <div key={account.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                                                 <div className="flex items-center gap-3">
                                                     <div className="bg-indigo-100 text-indigo-700 p-2 rounded-lg">
                                                         <Banknote className="w-4 h-4" />
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-slate-800">{account.bankName}</div>
-                                                        {account.accountName && <div className="text-sm text-slate-600">{account.accountName}</div>}
-                                                        <div className="text-xs text-slate-500">{account.accountType}</div>
+                                                        <div className="font-medium text-color-text-main">{account.bankName}</div>
+                                                        {account.accountName && <div className="text-sm text-color-text-muted">{account.accountName}</div>}
+                                                        <div className="text-xs text-color-text-muted">{account.accountType}</div>
                                                     </div>
                                                 </div>
                                                 <button
@@ -433,40 +433,39 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                 </div>
                             )}
 
-                            {/* Add New Bank Account */}
-                            <form onSubmit={handleBankAccountSubmit} className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-4">
-                                <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <form onSubmit={handleBankAccountSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+                                <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
                                     <Plus className="w-4 h-4 text-indigo-600" />
                                     Add Bank Account
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Bank Name</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Bank Name</label>
                                         <input
                                             type="text"
                                             value={bankName}
                                             onChange={(e) => setBankName(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="e.g. Chase Bank"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Account Name</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Account Name</label>
                                         <input
                                             type="text"
                                             value={bankAccountName}
                                             onChange={(e) => setBankAccountName(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="e.g. Joint Checking"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Account Type</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Account Type</label>
                                         <select
                                             value={accountType}
                                             onChange={(e) => setAccountType(e.target.value)}
-                                            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-900"
                                             required
                                         >
                                             <option value="Checking">Checking</option>
@@ -480,7 +479,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                 <button
                                     type="submit"
                                     disabled={createBankAccountMutation.isPending}
-                                    className="w-full bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition duration-200"
+                                    className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
                                 >
                                     {createBankAccountMutation.isPending ? 'Adding...' : 'Add Account'}
                                 </button>

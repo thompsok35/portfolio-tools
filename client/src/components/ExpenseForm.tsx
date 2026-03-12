@@ -101,7 +101,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-color-surface p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
+        <form onSubmit={handleSubmit} className="bg-color-surface p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
             <h3 className="text-lg font-semibold mb-4 text-color-text-main">
                 {isEditMode ? 'Edit Expense' : 'Record New Expense'}
             </h3>
@@ -112,7 +112,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     <input
                         type="text" required
                         placeholder="e.g. Groceries"
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                     />
@@ -122,7 +122,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     <label className="block text-sm font-medium text-color-text-main mb-1">Amount</label>
                     <input
                         type="number" step="0.01" required
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.plannedAmount}
                         onChange={e => setFormData({ ...formData, plannedAmount: e.target.value })}
                     />
@@ -131,7 +131,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                 <div>
                     <label className="block text-sm font-medium text-color-text-main mb-1">Type</label>
                     <select
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                         value={formData.isFixed ? 'true' : 'false'}
                         onChange={e => setFormData({ ...formData, isFixed: e.target.value === 'true' })}
                     >
@@ -143,7 +143,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                 <div>
                     <label className="block text-sm font-medium text-color-text-main mb-1">Frequency</label>
                     <select
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                         value={formData.frequency.toString()}
                         onChange={e => setFormData({ ...formData, frequency: parseInt(e.target.value) as any })}
                     >
@@ -158,7 +158,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     <div>
                         <label className="block text-sm font-medium text-color-text-main mb-1">Assigned Plan</label>
                         <select
-                            className="w-full border border-slate-300 rounded-lg px-3 py-2 bg-white"
+                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                             value={formData.planId}
                             onChange={e => setFormData({ ...formData, planId: e.target.value })}
                         >
@@ -173,19 +173,19 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     <label className="block text-sm font-medium text-color-text-main mb-1">Start Date</label>
                     <input
                         type="date" required
-                        className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                         value={formData.targetDate}
                         onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
                     />
                 </div>
 
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4 mt-2">
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
                     <div className="min-w-0">
                         <label className="block text-sm font-medium text-color-text-main mb-1 truncate" title="Website URL (Optional)">Website URL (Opt)</label>
                         <input
                             type="url"
                             placeholder="https://..."
-                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                             value={formData.websiteUrl}
                             onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
                         />
@@ -196,7 +196,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                         <input
                             type="text"
                             placeholder="Login ID or Email"
-                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                             value={formData.userName}
                             onChange={e => setFormData({ ...formData, userName: e.target.value })}
                         />
@@ -208,7 +208,7 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
                             type="password"
                             autoComplete="new-password"
                             placeholder={isEditMode && initialData?.encryptedPassword === "***" ? "********" : "Enter password"}
-                            className="w-full border border-slate-300 rounded-lg px-3 py-2"
+                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
                             value={formData.encryptedPassword === "***" ? "" : formData.encryptedPassword}
                             onChange={e => setFormData({ ...formData, encryptedPassword: e.target.value })}
                         />

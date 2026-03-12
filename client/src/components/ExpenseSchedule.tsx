@@ -65,23 +65,23 @@ export const ExpenseSchedule = () => {
     const expenseList = expenses || [];
 
     return (
-        <div className="bg-color-surface rounded-xl shadow-sm border border-slate-200 p-6 min-h-[400px]">
+        <div className="bg-color-surface rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 min-h-[400px]">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-color-text-main flex items-center gap-2">
                     <WalletCards className="h-5 w-5 text-color-danger" />
                     Expenses Schedule
                 </h2>
-                <div className="flex items-center bg-slate-100 rounded-lg p-1">
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                     <button
                         onClick={() => setViewMode('cards')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-white shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                         title="Card View"
                     >
                         <LayoutGrid className="h-4 w-4" />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                         title="List View"
                     >
                         <ListIcon className="h-4 w-4" />
@@ -90,7 +90,7 @@ export const ExpenseSchedule = () => {
             </div>
 
             {expenseList.length === 0 ? (
-                <div className="text-center p-12 text-color-text-muted border-2 border-dashed border-slate-200 rounded-lg">
+                <div className="text-center p-12 text-color-text-muted border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
                     No expected expenses. Use the form above to add your monthly expenses.
                 </div>
             ) : (
@@ -126,20 +126,20 @@ export const ExpenseSchedule = () => {
                                     onCancel={() => setEditingId(null)}
                                 />
                             ) : viewMode === 'cards' ? (
-                                <div className="border border-slate-100 bg-slate-50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
+                                <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
                                     <div className="flex justify-between items-start mb-3">
                                         <h4 className="font-semibold text-color-text-main pr-16">{expense.name}</h4>
                                         <div className="absolute top-4 right-4 flex gap-1">
                                             <button
                                                 onClick={() => setEditingId(expense.id)}
-                                                className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 rounded-md transition-all"
+                                                className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                                 title="Edit Expense"
                                             >
                                                 <Edit2 className="h-4 w-4" />
                                             </button>
                                             <button
                                                 onClick={() => setDeletingId(expense.id)}
-                                                className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 rounded-md transition-all"
+                                                className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                                 title="Delete Expense"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -148,10 +148,10 @@ export const ExpenseSchedule = () => {
                                     </div>
 
                                     <div className="mb-3 flex flex-wrap gap-2">
-                                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${expense.isFixed ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
+                                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${expense.isFixed ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'}`}>
                                             {expense.isFixed ? 'Fixed' : 'Variable'}
                                         </span>
-                                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                                             {expense.frequency === 0 ? 'One-Time' :
                                                 expense.frequency === 1 ? 'Monthly' :
                                                     expense.frequency === 2 ? 'Quarterly' : 'Yearly'}
@@ -170,7 +170,7 @@ export const ExpenseSchedule = () => {
                                     </div>
 
                                     {(expense.websiteUrl || expense.userName || expense.encryptedPassword === "***") && (
-                                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-100 flex-wrap">
+                                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex-wrap">
                                             {expense.websiteUrl && (
                                                 <a
                                                     href={expense.websiteUrl}
@@ -183,7 +183,7 @@ export const ExpenseSchedule = () => {
                                                 </a>
                                             )}
                                             {expense.userName && (
-                                                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded mr-2">
+                                                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded mr-2">
                                                     <User className="h-3.5 w-3.5" />
                                                     {expense.userName}
                                                 </div>
@@ -199,7 +199,7 @@ export const ExpenseSchedule = () => {
                                                         {revealedPasswords[expense.id] !== undefined ? 'Hide Key' : 'Reveal Key'}
                                                     </button>
                                                     {revealedPasswords[expense.id] !== undefined && (
-                                                        <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-color-text-main border border-slate-200">
+                                                        <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-color-text-main border border-slate-200 dark:border-slate-700">
                                                             {revealedPasswords[expense.id] || '(empty)'}
                                                         </span>
                                                     )}
@@ -209,7 +209,7 @@ export const ExpenseSchedule = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="border border-slate-100 bg-slate-50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
+                                <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
                                     <div className="flex-1 font-semibold text-color-text-main min-w-0 pr-4 flex items-center gap-2">
                                         <span className="truncate">{expense.name}</span>
                                         {expense.websiteUrl && (
@@ -241,7 +241,7 @@ export const ExpenseSchedule = () => {
                                             </button>
                                         )}
                                         {revealedPasswords[expense.id] !== undefined && (
-                                            <span className="text-xs font-mono bg-white px-2 py-0.5 rounded text-color-text-main border border-slate-200 shrink-0 shadow-sm ml-2">
+                                            <span className="text-xs font-mono bg-color-surface px-2 py-0.5 rounded text-color-text-main border border-slate-200 dark:border-slate-700 shrink-0 shadow-sm ml-2">
                                                 {revealedPasswords[expense.id] || '(empty)'}
                                             </span>
                                         )}
@@ -255,14 +255,14 @@ export const ExpenseSchedule = () => {
                                     <div className="flex gap-1 shrink-0 ml-2">
                                         <button
                                             onClick={() => setEditingId(expense.id)}
-                                            className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 rounded-md transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-color-primary hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                             title="Edit Expense"
                                         >
                                             <Edit2 className="h-4 w-4" />
                                         </button>
                                         <button
                                             onClick={() => setDeletingId(expense.id)}
-                                            className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 rounded-md transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-color-danger hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-all"
                                             title="Delete Expense"
                                         >
                                             <Trash2 className="h-4 w-4" />
