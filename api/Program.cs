@@ -21,7 +21,14 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // ==== Authentication ====
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_dev_key_only_change_in_prod";
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    if (builder.Environment.IsDevelopment())
+        jwtKey = "super_secret_dev_key_only_change_in_prod";
+    else
+        throw new InvalidOperationException("CRITICAL SECURITY ERROR: Jwt:Key must be set in appsettings or environment variables in Production.");
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -38,11 +45,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // ==== CORS Policy ====
+var allowedOriginsStr = builder.Configuration["AllowedOrigins"] ?? "http://localhost:5173,http://localhost:3000";
+var allowedOrigins = allowedOriginsStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:3000") // standard Vite & CRA ports
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // needed if using cookies with JWT later

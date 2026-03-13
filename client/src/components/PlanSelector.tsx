@@ -34,6 +34,18 @@ export const PlanSelector = () => {
         }
     }, [plans, activePlanId, setActivePlan]);
 
+    // Update the browser tab title to reflect the active plan
+    useEffect(() => {
+        if (plans && activePlanId) {
+            const activePlan = plans.find(p => p.id === activePlanId);
+            if (activePlan) {
+                document.title = `CashMap - ${activePlan.name}`;
+            }
+        } else {
+            document.title = 'CashMap - Financial Planner';
+        }
+    }, [plans, activePlanId]);
+
     const handleCreateSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newPlanName.trim()) return;

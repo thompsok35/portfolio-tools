@@ -43,7 +43,7 @@ function Dashboard() {
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-400 dark:to-cyan-300 bg-clip-text text-transparent flex items-center gap-3 pb-1">
-              Income & Expense Planner
+              CashMap
             </h1>
             <p className="text-base font-medium text-color-text-muted mt-1">Track expected income against expenses.</p>
           </div>

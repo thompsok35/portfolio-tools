@@ -48,6 +48,7 @@ export interface UserProfile {
     id?: string;
     userId?: string;
     accountName?: string;
+    friendlyName?: string;
 }
 
 export interface PlanShare {

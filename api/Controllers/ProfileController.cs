@@ -51,8 +51,31 @@ public class ProfileController : ControllerBase
             return NotFound();
 
         profile.AccountName = updatedProfile.AccountName;
+        profile.FriendlyName = updatedProfile.FriendlyName;
         
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = GetUserId();
+        var user = await _context.Users.FindAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash))
+        {
+            return BadRequest(new { message = "Incorrect current password." });
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Password changed successfully." });
     }
 }

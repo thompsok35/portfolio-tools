@@ -11,4 +11,7 @@ public class UserProfile
     
     [MaxLength(100)]
     public string? AccountName { get; set; }
+    
+    [MaxLength(50)]
+    public string? FriendlyName { get; set; }
 }

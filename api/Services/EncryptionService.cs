@@ -10,7 +10,11 @@ public class EncryptionService
     public EncryptionService(IConfiguration configuration)
     {
         // 32-character (256-bit) key required for AES-256
-        _key = configuration["CryptoKey"] ?? throw new InvalidOperationException("CryptoKey not found in configuration.");
+        _key = configuration["CryptoKey"];
+        if (string.IsNullOrEmpty(_key) || _key.Length != 32)
+        {
+            throw new InvalidOperationException("CRITICAL SECURITY ERROR: CryptoKey must be exactly 32 characters long in configuration.");
+        }
     }
 
     public string Encrypt(string plainText)

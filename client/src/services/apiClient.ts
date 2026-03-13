@@ -1,7 +1,6 @@
 import type { AppConfigCategory, ExpenseCategory, IncomeSource, SummaryDashboardStats, Plan, UserProfile, PortfolioIntegration, BankAccount } from '../types/models';
 
-const API_BASE_URL = 'http://localhost:5031/api'; // Standard ASP.NET Core dev port, can adjust based on launchSettings
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
     const token = localStorage.getItem('token');
 
@@ -162,6 +161,19 @@ export const apiClient = {
             body: JSON.stringify(data)
         });
         if (!res.ok) throw new Error('Failed to update user profile');
+    },
+
+    changePassword: async (data: any): Promise<{ message: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Profile/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to change password');
+        }
+        return res.json();
     },
 
     verifySharedEmail: async (): Promise<{ status: string }> => {

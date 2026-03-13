@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, CheckCircle, Banknote, Shield, User, Trash2, Plus } from 'lucide-react';
+import { X, CheckCircle, Banknote, Shield, User, Users, Trash2, Plus } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 import type { UserProfile, PortfolioIntegration, BankAccount, Plan, PlanShare } from '../types/models';
 
@@ -11,10 +11,18 @@ interface Props {
 
 export function AccountProfileModal({ isOpen, onClose }: Props) {
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTab] = useState<'General' | 'Integrations' | 'Bank Accounts'>('General');
+    const [activeTab, setActiveTab] = useState<'General' | 'Sharing' | 'Integrations' | 'Bank Accounts'>('General');
 
     // General Tab State
     const [accountName, setAccountName] = useState('');
+    const [friendlyName, setFriendlyName] = useState('');
+
+    // Change Password State
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
 
     const [sharePlanId, setSharePlanId] = useState('');
     const [planShareEmail, setPlanShareEmail] = useState('');
@@ -40,6 +48,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
     React.useEffect(() => {
         if (profile) {
             setAccountName(profile.accountName || '');
+            setFriendlyName(profile.friendlyName || '');
         }
     }, [profile]);
 
@@ -80,7 +89,8 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
     const updateProfileMutation = useMutation({
         mutationFn: () => apiClient.updateProfile({
             id: profile?.id,
-            accountName
+            accountName,
+            friendlyName
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -101,6 +111,26 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['planShares', sharePlanId] });
             queryClient.invalidateQueries({ queryKey: ['plans'] });
+        }
+    });
+
+    // Mutations - Security
+    const changePasswordMutation = useMutation({
+        mutationFn: () => apiClient.changePassword({
+            oldPassword,
+            newPassword
+        }),
+        onSuccess: (data) => {
+            setPasswordSuccess(data.message || 'Password changed successfully!');
+            setPasswordError('');
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setTimeout(() => setPasswordSuccess(''), 5000);
+        },
+        onError: (error: Error) => {
+            setPasswordError(error.message);
+            setPasswordSuccess('');
         }
     });
 
@@ -154,6 +184,19 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         updateProfileMutation.mutate();
     };
 
+    const handlePasswordSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
+            setPasswordError('New passwords do not match');
+            return;
+        }
+        if (newPassword.length < 6) {
+            setPasswordError('New password must be at least 6 characters');
+            return;
+        }
+        changePasswordMutation.mutate();
+    };
+
     const handleInviteSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (sharePlanId && planShareEmail) {
@@ -204,6 +247,16 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                         General
                     </button>
                     <button
+                        onClick={() => setActiveTab('Sharing')}
+                        className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Sharing'
+                            ? 'border-indigo-600 text-indigo-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-700'
+                            }`}
+                    >
+                        <Users className="w-4 h-4" />
+                        Sharing
+                    </button>
+                    <button
                         onClick={() => setActiveTab('Integrations')}
                         className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Integrations'
                             ? 'border-indigo-600 text-indigo-600'
@@ -234,27 +287,108 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                             {/* Base Profile Details */}
                             <form onSubmit={handleProfileSubmit} className="space-y-4">
                                 <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2">Profile Information</h3>
-                                <div>
-                                    <label className="block text-sm font-medium text-color-text-main mb-1">Account Name</label>
-                                    <input
-                                        type="text"
-                                        value={accountName}
-                                        onChange={(e) => setAccountName(e.target.value)}
-                                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="Enter your account name"
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-color-text-main mb-1">Account Name</label>
+                                        <input
+                                            type="text"
+                                            value={accountName}
+                                            onChange={(e) => setAccountName(e.target.value)}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="Enter your account name"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-color-text-main mb-1">Friendly Name / Nickname</label>
+                                        <input
+                                            type="text"
+                                            value={friendlyName}
+                                            onChange={(e) => setFriendlyName(e.target.value)}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="What should we call you?"
+                                        />
+                                    </div>
                                 </div>
                                 <button
                                     type="submit"
                                     disabled={updateProfileMutation.isPending}
                                     className="w-full flex justify-center items-center gap-2 bg-slate-100 dark:bg-slate-800/50 text-color-text-main px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700/50 transition duration-200"
                                 >
-                                    {updateProfileMutation.isPending ? 'Saving...' : 'Update Name'}
+                                    {updateProfileMutation.isPending ? 'Saving...' : 'Update Profile'}
                                 </button>
                             </form>
 
-                            {/* Plan Sharing Details */}
+                            {/* Security / Change Password */}
                             <div className="space-y-4 pt-2">
+                                <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2">
+                                    <Shield className="w-4 h-4 text-slate-500" />
+                                    Security
+                                </h3>
+                                <form onSubmit={handlePasswordSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+
+                                    {passwordError && (
+                                        <div className="text-sm text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400 p-3 rounded-lg border border-rose-100 dark:border-rose-800/50">
+                                            {passwordError}
+                                        </div>
+                                    )}
+                                    {passwordSuccess && (
+                                        <div className="text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-2">
+                                            <CheckCircle className="w-4 h-4" />
+                                            {passwordSuccess}
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Current Password</label>
+                                        <input
+                                            type="password"
+                                            value={oldPassword}
+                                            onChange={(e) => setOldPassword(e.target.value)}
+                                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-color-text-main mb-1">New Password</label>
+                                            <input
+                                                type="password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-color-text-main mb-1">Confirm New Password</label>
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={changePasswordMutation.isPending}
+                                        className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
+                                    >
+                                        {changePasswordMutation.isPending ? 'Updating...' : 'Change Password'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SHARING TAB */}
+                    {activeTab === 'Sharing' && (
+                        <div className="space-y-6">
+                            {/* Plan Sharing Details */}
+                            <div className="space-y-4">
                                 <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2">Plan Access Control</h3>
                                 <div>
                                     <label className="block text-sm font-medium text-color-text-main mb-1">Select Plan Scope</label>
