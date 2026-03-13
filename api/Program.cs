@@ -60,7 +60,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Automatically apply pending migrations to the database (Crucial for Railway staging/prod)
+    context.Database.Migrate();
+}
 app.UseHttpsRedirection();
 
 app.UseCors("AllowReactApp");
