@@ -9,9 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Railway provides a URL like postgres://user:pass@host:port/db
+// Railway provides a URL like postgresql://user:pass@host:port/db
 // Npgsql expects Server=host;Port=port;Database=db;User Id=user;Password=pass;
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgres://"))
+if (!string.IsNullOrEmpty(connectionString) && (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://")))
 {
     var databaseUri = new Uri(connectionString);
     var userInfo = databaseUri.UserInfo.Split(':');
