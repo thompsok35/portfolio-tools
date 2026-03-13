@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Models;
-using api.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
