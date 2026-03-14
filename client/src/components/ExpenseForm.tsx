@@ -73,9 +73,14 @@ export const ExpenseForm = ({ initialData, onSuccess, onCancel }: ExpenseFormPro
             return;
         }
 
+        // If it's a new expense, we should ALWAYS use the current activePlanId 
+        // regardless of whatever stale value might be sitting in the formData state,
+        // unless the user explicitly chose a different plan from the dropdown (which is only shown in edit mode).
+        const planToUse = (isEditMode && formData.planId) ? formData.planId : activePlanId;
+
         mutation.mutate({
             ...formData,
-            planId: formData.planId || activePlanId,
+            planId: planToUse,
             plannedAmount: parseFloat(formData.plannedAmount),
             frequency: parseInt(formData.frequency.toString()),
             targetDate: new Date(formData.targetDate).toISOString()

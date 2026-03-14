@@ -28,6 +28,7 @@ export interface ExpenseCategory {
     websiteUrl?: string;
     userName?: string;
     encryptedPassword?: string;
+    categoryGroup?: string;
     planId: string;
 }
 
@@ -41,6 +42,9 @@ export interface SummaryDashboardStats {
     totalIncome: number;
     totalExpenses: number;
     netSurplusDeficit: number;
+    ytdIncome: number;
+    ytdExpenses: number;
+    ytdNetSurplusDeficit: number;
     expectedIncomes: IncomeSource[];
 }
 

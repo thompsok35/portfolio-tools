@@ -29,5 +29,7 @@ public class ExpenseCategory
     
     public string? EncryptedPassword { get; set; }
 
+    public string? CategoryGroup { get; set; }
+
     public Guid PlanId { get; set; }
 }

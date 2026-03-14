@@ -193,4 +193,61 @@ public class ExpenseCategoriesController : ControllerBase
     {
         return _context.ExpenseCategories.Any(e => e.Id == id);
     }
+
+    [HttpPost("group")]
+    public async Task<IActionResult> GroupExpenses([FromBody] GroupExpensesRequest request)
+    {
+        if (request.ExpenseIds == null || !request.ExpenseIds.Any() || string.IsNullOrWhiteSpace(request.GroupName))
+            return BadRequest("Invalid request.");
+
+        var planId = request.PlanId;
+        if (!await HasPlanAccessAsync(planId)) return Forbid();
+
+        var expenses = await _context.ExpenseCategories
+            .Where(e => request.ExpenseIds.Contains(e.Id) && e.PlanId == planId)
+            .ToListAsync();
+
+        foreach (var expense in expenses)
+        {
+            expense.CategoryGroup = request.GroupName.Trim();
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { count = expenses.Count, groupName = request.GroupName });
+    }
+
+    [HttpPost("ungroup")]
+    public async Task<IActionResult> UngroupExpenses([FromBody] UngroupExpensesRequest request)
+    {
+        if (request.ExpenseIds == null || !request.ExpenseIds.Any())
+            return BadRequest("Invalid request.");
+
+        var planId = request.PlanId;
+        if (!await HasPlanAccessAsync(planId)) return Forbid();
+
+        var expenses = await _context.ExpenseCategories
+            .Where(e => request.ExpenseIds.Contains(e.Id) && e.PlanId == planId)
+            .ToListAsync();
+
+        foreach (var expense in expenses)
+        {
+            expense.CategoryGroup = null;
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { count = expenses.Count });
+    }
+}
+
+public class GroupExpensesRequest
+{
+    public required List<Guid> ExpenseIds { get; set; }
+    public required string GroupName { get; set; }
+    public Guid PlanId { get; set; }
+}
+
+public class UngroupExpensesRequest
+{
+    public required List<Guid> ExpenseIds { get; set; }
+    public Guid PlanId { get; set; }
 }

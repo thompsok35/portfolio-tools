@@ -133,6 +133,26 @@ export const apiClient = {
         return res.json();
     },
 
+    groupExpenses: async (planId: string, expenseIds: string[], groupName: string): Promise<{ count: number, groupName: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/ExpenseCategories/group`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planId, expenseIds, groupName })
+        });
+        if (!res.ok) throw new Error('Failed to group expenses');
+        return res.json();
+    },
+
+    ungroupExpenses: async (planId: string, expenseIds: string[]): Promise<{ count: number }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/ExpenseCategories/ungroup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planId, expenseIds })
+        });
+        if (!res.ok) throw new Error('Failed to ungroup expenses');
+        return res.json();
+    },
+
     // Summaries
     getMonthlySummary: async (year: number, month: number, planId: string): Promise<SummaryDashboardStats> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/Summary/${year}/${month}?planId=${planId}`);

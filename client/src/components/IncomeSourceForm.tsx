@@ -62,7 +62,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
 
         mutation.mutate({
             ...formData,
-            planId: activePlanId,
+            planId: activePlanId, // Always pull fresh from context
             amount: parseFloat(formData.amount),
             targetDate: new Date(formData.targetDate).toISOString()
         });

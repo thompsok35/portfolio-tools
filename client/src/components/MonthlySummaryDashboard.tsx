@@ -32,6 +32,9 @@ export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) =>
                     <h3 className="text-3xl font-bold text-color-text-main">
                         ${summary?.totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
+                    <p className="text-xs font-semibold text-color-text-muted mt-1.5 opacity-80">
+                        YTD: ${summary?.ytdIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                    </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
                     <TrendingUp className="text-color-primary h-6 w-6" />
@@ -45,6 +48,9 @@ export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) =>
                     <h3 className="text-3xl font-bold text-color-text-main">
                         ${summary?.totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
+                    <p className="text-xs font-semibold text-color-text-muted mt-1.5 opacity-80">
+                        YTD: ${summary?.ytdExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                    </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
                     <TrendingDown className="text-color-danger h-6 w-6" />
@@ -58,6 +64,9 @@ export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) =>
                     <h3 className={`text-3xl font-bold ${isSurplus ? 'text-color-success' : 'text-color-danger'}`}>
                         {isSurplus ? '+' : ''}${netValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
+                    <p className={`text-xs font-semibold mt-1.5 opacity-80 ${summary && summary.ytdNetSurplusDeficit >= 0 ? 'text-color-success' : 'text-color-danger'}`}>
+                        YTD: {summary && summary.ytdNetSurplusDeficit >= 0 ? '+' : ''}${summary?.ytdNetSurplusDeficit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                    </p>
                 </div>
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center ${isSurplus ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30'}`}>
                     <Wallet className={`${isSurplus ? 'text-color-success' : 'text-color-danger'} h-6 w-6`} />

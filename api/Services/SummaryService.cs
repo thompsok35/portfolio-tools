@@ -9,6 +9,9 @@ public class SummaryDashboardStats
     public decimal TotalIncome { get; set; }
     public decimal TotalExpenses { get; set; }
     public decimal NetSurplusDeficit => TotalIncome - TotalExpenses;
+    public decimal YTDIncome { get; set; }
+    public decimal YTDExpenses { get; set; }
+    public decimal YTDNetSurplusDeficit => YTDIncome - YTDExpenses;
     public List<IncomeSource> ExpectedIncomes { get; set; } = new List<IncomeSource>();
 }
 
@@ -55,11 +58,35 @@ public class SummaryService
             }
         }
 
+        // 3. Calculate Year-To-Date Totals (Month 1 through current month)
+        decimal ytdIncome = 0;
+        decimal ytdExpenses = 0;
+
+        for (int m = 1; m <= month; m++)
+        {
+            foreach (var expense in allExpenses)
+            {
+                if (IsExpenseExpectedInMonth(expense, year, m))
+                {
+                    ytdExpenses += expense.PlannedAmount;
+                }
+            }
+            foreach (var income in allIncome)
+            {
+                if (IsIncomeExpectedInMonth(income, year, m))
+                {
+                    ytdIncome += income.Amount;
+                }
+            }
+        }
+
         return new SummaryDashboardStats
         {
             TotalIncome = expectedIncome,
             TotalExpenses = totalExpenses,
-            ExpectedIncomes = expectedIncomeItems
+            ExpectedIncomes = expectedIncomeItems,
+            YTDIncome = ytdIncome,
+            YTDExpenses = ytdExpenses
         };
     }
 
