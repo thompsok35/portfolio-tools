@@ -82,7 +82,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
     const { data: planShares = [] } = useQuery<PlanShare[]>({
         queryKey: ['planShares', sharePlanId],
         queryFn: () => apiClient.getPlanShares(sharePlanId),
-        enabled: isOpen && activeTab === 'General' && !!sharePlanId
+        enabled: isOpen && activeTab === 'Sharing' && !!sharePlanId
     });
 
     // Mutations - Profile
@@ -103,6 +103,9 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
             queryClient.invalidateQueries({ queryKey: ['planShares', sharePlanId] });
             queryClient.invalidateQueries({ queryKey: ['plans'] }); // Refresh main plans to update navigation
             setPlanShareEmail('');
+        },
+        onError: (err: any) => {
+            alert(err.message || 'Failed to share plan.');
         }
     });
 

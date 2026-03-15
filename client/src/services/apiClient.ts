@@ -217,7 +217,10 @@ export const apiClient = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ planId, sharedWithEmail, status: 'Active' })
         });
-        if (!res.ok) throw new Error('Failed to create plan share');
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to create plan share');
+        }
         return res.json();
     },
 
