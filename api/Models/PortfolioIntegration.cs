@@ -19,4 +19,12 @@ public class PortfolioIntegration
     // AES-256 Encrypted Payload Data
     [Required]
     public string EncryptedApiAccessToken { get; set; } = string.Empty;
+    
+    // The base URL of the external portfolio API endpoint
+    [MaxLength(500)]
+    public string PortfolioEndpointUrl { get; set; } = string.Empty;
+
+    // Optional constraint to rigidly limit fetch to a specific account id
+    [MaxLength(100)]
+    public string? AccountNumber { get; set; }
 }

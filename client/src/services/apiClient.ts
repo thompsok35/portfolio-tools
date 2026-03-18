@@ -248,9 +248,49 @@ export const apiClient = {
         return res.json();
     },
 
+    updateIntegration: async (id: string, data: Partial<PortfolioIntegration>): Promise<{ success: boolean; message: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to update integration');
+        }
+        return res.json();
+    },
+
     deleteIntegration: async (id: string): Promise<void> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Failed to delete integration');
+    },
+
+    testIntegration: async (id: string): Promise<{ success: boolean; message: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/${id}/test`, { method: 'POST' });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Connection test failed');
+        }
+        return res.json();
+    },
+
+    syncLinkedExpectedIncome: async (planId: string): Promise<{ success: boolean; expectedIncome: number; message: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/sync-income/${planId}`, { method: 'POST' });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to sync expected income');
+        }
+        return res.json();
+    },
+
+    syncLinkedExpectedDividends: async (planId: string): Promise<{ success: boolean; expectedIncome: number; message: string }> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Integrations/sync-dividends/${planId}`, { method: 'POST' });
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to sync expected dividends');
+        }
+        return res.json();
     },
 
     // Bank Accounts

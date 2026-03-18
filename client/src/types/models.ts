@@ -69,6 +69,8 @@ export interface PortfolioIntegration {
     planId: string;
     nickname: string;
     encryptedApiAccessToken: string;
+    portfolioEndpointUrl: string;
+    accountNumber?: string;
 }
 
 export interface BankAccount {

@@ -297,21 +297,26 @@ export const ExpenseSchedule = () => {
                     <WalletCards className="h-6 w-6 text-color-danger" />
                     Expenses Schedule
                 </h2>
-                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 shadow-inner border border-slate-200 dark:border-slate-700">
-                    <button
-                        onClick={() => setViewMode('cards')}
-                        className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-white dark:bg-slate-700 shadow-sm text-color-primary font-bold' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        title="Card View"
-                    >
-                        <LayoutGrid className="h-4 w-4" />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-color-primary font-bold' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        title="List View"
-                    >
-                        <ListIcon className="h-4 w-4" />
-                    </button>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 shadow-inner border border-slate-200 dark:border-slate-700">
+                        <ExpenseForm />
+                    </div>
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 shadow-inner border border-slate-200 dark:border-slate-700">
+                        <button
+                            onClick={() => setViewMode('cards')}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'cards' ? 'bg-white dark:bg-slate-700 shadow-sm text-color-primary font-bold' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            title="Card View"
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm text-color-primary font-bold' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            title="List View"
+                        >
+                            <ListIcon className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

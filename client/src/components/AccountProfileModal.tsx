@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, CheckCircle, Banknote, Shield, User, Users, Trash2, Plus } from 'lucide-react';
+import { X, CheckCircle, XCircle, Banknote, Shield, User, Users, Trash2, Plus, Zap, Loader2, Pencil } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 import type { UserProfile, PortfolioIntegration, BankAccount, Plan, PlanShare } from '../types/models';
 
@@ -31,6 +31,14 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
     const [nickname, setNickname] = useState('');
     const [apiToken, setApiToken] = useState('');
     const [integrationPlanId, setIntegrationPlanId] = useState('');
+    const [portfolioEndpointUrl, setPortfolioEndpointUrl] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
+
+    const [editingIntegrationId, setEditingIntegrationId] = useState<string | null>(null);
+
+    // Test Connection State
+    const [testStatus, setTestStatus] = useState<Record<string, 'idle' | 'testing' | 'success' | 'error'>>({});
+    const [testMessage, setTestMessage] = useState<Record<string, string>>({});
 
     // Bank Accounts Tab State
     const [bankName, setBankName] = useState('');
@@ -142,14 +150,53 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         mutationFn: () => apiClient.createIntegration({
             nickname,
             encryptedApiAccessToken: apiToken,
-            planId: integrationPlanId
+            planId: integrationPlanId,
+            portfolioEndpointUrl,
+            accountNumber
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['integrations'] });
             setNickname('');
             setApiToken('');
+            setPortfolioEndpointUrl('');
+            setAccountNumber('');
         }
     });
+
+    const updateIntegrationMutation = useMutation({
+        mutationFn: () => apiClient.updateIntegration(editingIntegrationId!, {
+            nickname,
+            encryptedApiAccessToken: apiToken,
+            planId: integrationPlanId,
+            portfolioEndpointUrl,
+            accountNumber
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['integrations'] });
+            resetIntegrationForm();
+        }
+    });
+
+    const resetIntegrationForm = () => {
+        setNickname('');
+        setApiToken('');
+        setPortfolioEndpointUrl('');
+        setAccountNumber('');
+        setEditingIntegrationId(null);
+    };
+
+    const handleEditIntegration = (integration: PortfolioIntegration) => {
+        setEditingIntegrationId(integration.id!);
+        setNickname(integration.nickname);
+        setIntegrationPlanId(integration.planId);
+        setPortfolioEndpointUrl(integration.portfolioEndpointUrl || '');
+        setAccountNumber(integration.accountNumber || '');
+        setApiToken(''); // Clear it securely so user has to specifically overwrite it if they want
+        
+        // Ensure form is visible (it's in the standard active loop tab)
+        const formEl = document.getElementById('integration-form');
+        if (formEl) formEl.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const deleteIntegrationMutation = useMutation({
         mutationFn: (id: string) => apiClient.deleteIntegration(id),
@@ -209,7 +256,9 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
 
     const handleIntegrationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (nickname && apiToken && integrationPlanId) {
+        if (editingIntegrationId) {
+            updateIntegrationMutation.mutate();
+        } else if (nickname && apiToken && integrationPlanId) {
             createIntegrationMutation.mutate();
         }
     };
@@ -455,35 +504,103 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     {activeTab === 'Integrations' && (
                         <div className="space-y-6">
 
-                            {/* Vault List */}
+                            {/* Active Integrations List */}
                             {integrations.length > 0 && (
                                 <div className="space-y-3">
                                     <h3 className="text-sm font-semibold text-color-text-main">Active Integrations</h3>
                                     <div className="space-y-2">
-                                        {integrations.map((integration) => (
-                                            <div key={integration.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                                <div>
-                                                    <div className="font-medium text-color-text-main">{integration.nickname}</div>
-                                                    <div className="text-xs text-color-text-muted font-mono tracking-widest">{integration.encryptedApiAccessToken}</div>
+                                        {integrations.map((integration) => {
+                                            const linkedPlan = plans.find(p => p.id === integration.planId);
+                                            const status = testStatus[integration.id || ''] || 'idle';
+                                            const message = testMessage[integration.id || ''] || '';
+                                            return (
+                                                <div key={integration.id} className="p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <div className="font-medium text-color-text-main">{integration.nickname}</div>
+                                                            {linkedPlan && (
+                                                                <div className="text-xs text-indigo-500 font-medium mt-0.5">Plan: {linkedPlan.name}</div>
+                                                            )}
+                                                            {integration.accountNumber && (
+                                                                <div className="text-xs text-indigo-500 font-medium mt-0.5">Account ID: {integration.accountNumber}</div>
+                                                            )}
+                                                            <div className="text-xs text-color-text-muted font-mono tracking-widest mt-1">{integration.encryptedApiAccessToken}</div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                onClick={() => handleEditIntegration(integration)}
+                                                                className="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                                                title="Edit Integration"
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!integration.id) return;
+                                                                    setTestStatus(prev => ({ ...prev, [integration.id!]: 'testing' }));
+                                                                    setTestMessage(prev => ({ ...prev, [integration.id!]: '' }));
+                                                                    apiClient.testIntegration(integration.id)
+                                                                        .then((result) => {
+                                                                            setTestStatus(prev => ({ ...prev, [integration.id!]: 'success' }));
+                                                                            setTestMessage(prev => ({ ...prev, [integration.id!]: result.message }));
+                                                                            setTimeout(() => {
+                                                                                setTestStatus(prev => ({ ...prev, [integration.id!]: 'idle' }));
+                                                                                setTestMessage(prev => ({ ...prev, [integration.id!]: '' }));
+                                                                            }, 5000);
+                                                                        })
+                                                                        .catch((err) => {
+                                                                            setTestStatus(prev => ({ ...prev, [integration.id!]: 'error' }));
+                                                                            setTestMessage(prev => ({ ...prev, [integration.id!]: err.message || 'Test failed' }));
+                                                                            setTimeout(() => {
+                                                                                setTestStatus(prev => ({ ...prev, [integration.id!]: 'idle' }));
+                                                                                setTestMessage(prev => ({ ...prev, [integration.id!]: '' }));
+                                                                            }, 5000);
+                                                                        });
+                                                                }}
+                                                                disabled={status === 'testing'}
+                                                                className="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                                                                title="Test Connection"
+                                                            >
+                                                                {status === 'testing' ? (
+                                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                                ) : (
+                                                                    <Zap className="w-4 h-4" />
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => integration.id && deleteIntegrationMutation.mutate(integration.id)}
+                                                                className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+                                                                title="Remove Integration"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {/* Test Connection Feedback */}
+                                                    {status === 'success' && (
+                                                        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50">
+                                                            <CheckCircle className="w-3.5 h-3.5" />
+                                                            {message || 'Connection verified successfully'}
+                                                        </div>
+                                                    )}
+                                                    {status === 'error' && (
+                                                        <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-3 py-2 rounded-lg border border-rose-100 dark:border-rose-800/50">
+                                                            <XCircle className="w-3.5 h-3.5" />
+                                                            {message || 'Connection test failed'}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <button
-                                                    onClick={() => integration.id && deleteIntegrationMutation.mutate(integration.id)}
-                                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                                                    title="Remove Integration"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
 
                             {/* Add New Integration */}
-                            <form onSubmit={handleIntegrationSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+                            <form id="integration-form" onSubmit={handleIntegrationSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
                                 <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
                                     <Plus className="w-4 h-4 text-indigo-600" />
-                                    Portfolio Manager Add-On
+                                    {editingIntegrationId ? 'Edit Integration' : 'Portfolio Manager Add-On'}
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,6 +629,28 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                         </select>
                                     </div>
                                     <div className="md:col-span-2">
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Portfolio Endpoint URL</label>
+                                        <input
+                                            type="url"
+                                            value={portfolioEndpointUrl}
+                                            onChange={(e) => setPortfolioEndpointUrl(e.target.value)}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="https://api.portfolio-service.com/v1"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Target Account Number (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={accountNumber}
+                                            onChange={(e) => setAccountNumber(e.target.value)}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="e.g. 6YA49198"
+                                            title="Leave blank to sync everything, or explicitly scope to a specific account."
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-xs font-medium text-color-text-main mb-1">Secure API Access Token</label>
                                         <input
                                             type="password"
@@ -519,19 +658,30 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                             autoComplete="new-password"
                                             onChange={(e) => setApiToken(e.target.value)}
                                             className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
-                                            placeholder="Paste secret token..."
-                                            required
+                                            placeholder={editingIntegrationId ? 'Leave blank to keep existing...' : 'Paste secret token...'}
+                                            required={!editingIntegrationId}
                                         />
                                     </div>
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={createIntegrationMutation.isPending || plans.length === 0}
-                                    className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
-                                >
-                                    {createIntegrationMutation.isPending ? 'Securing...' : 'Encrypt & Save Token'}
-                                </button>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="submit"
+                                        disabled={createIntegrationMutation.isPending || updateIntegrationMutation.isPending || plans.length === 0}
+                                        className="flex-1 bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
+                                    >
+                                        {updateIntegrationMutation.isPending || createIntegrationMutation.isPending ? 'Saving...' : (editingIntegrationId ? 'Update Integration' : 'Link Account')}
+                                    </button>
+                                    {editingIntegrationId && (
+                                        <button
+                                            type="button"
+                                            onClick={resetIntegrationForm}
+                                            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-700 transition duration-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+                                </div>
                             </form>
                         </div>
                     )}

@@ -4,6 +4,7 @@ import { Calendar, DollarSign, CalendarDays, Edit2, Trash2 } from 'lucide-react'
 import type { IncomeFrequency } from '../types/models';
 import { useState } from 'react';
 import { IncomeSourceForm } from './IncomeSourceForm';
+import { LinkedIncomeButton } from './LinkedIncomeButton';
 import { useAuth } from '../contexts/AuthContext';
 import { LayoutGrid, List } from 'lucide-react';
 
@@ -61,21 +62,27 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                     <CalendarDays className="h-5 w-5 text-color-primary" />
                     Expected Income Schedule
                 </h2>
-                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                    <button
-                        onClick={() => setViewMode('cards')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        title="Card View"
-                    >
-                        <LayoutGrid className="h-4 w-4" />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                        title="List View"
-                    >
-                        <List className="h-4 w-4" />
-                    </button>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                        <IncomeSourceForm />
+                        <LinkedIncomeButton />
+                    </div>
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('cards')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'cards' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            title="Card View"
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            title="List View"
+                        >
+                            <List className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -110,11 +117,13 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     </div>
                                 </div>
                             ) : editingId === income.id ? (
-                                <IncomeSourceForm
-                                    initialData={income}
-                                    onSuccess={() => setEditingId(null)}
-                                    onCancel={() => setEditingId(null)}
-                                />
+                                <div className="mt-6 mb-8 col-span-full">
+                                    <IncomeSourceForm
+                                        initialData={income}
+                                        onSuccess={() => setEditingId(null)}
+                                        onCancel={() => setEditingId(null)}
+                                    />
+                                </div>
                             ) : viewMode === 'cards' ? (
                                 <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
                                     <div className="flex justify-between items-start mb-3">

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Data;
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260318140714_AddPortfolioEndpointUrl")]
+    partial class AddPortfolioEndpointUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,7 +137,7 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("83637753-900e-40fa-8cc9-62c1a82adfb8"),
+                            Id = new Guid("180c7b7e-83dc-49e8-9e52-8f1051e12623"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Rent/Mortgage",
@@ -144,7 +147,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("081a5306-bf62-4952-b224-de9438454510"),
+                            Id = new Guid("cce42e5a-03d6-4179-a7a8-98b319cf3069"),
                             Frequency = 0,
                             IsFixed = false,
                             Name = "Groceries",
@@ -154,7 +157,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("ac1b5f43-1831-410b-8f96-bad727b9c0ef"),
+                            Id = new Guid("5105ee8f-e697-4d37-a77c-d9e2fbe2ca45"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Healthcare",
@@ -252,10 +255,6 @@ namespace api.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("AccountNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("EncryptedApiAccessToken")
                         .IsRequired()

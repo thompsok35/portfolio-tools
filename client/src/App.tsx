@@ -3,16 +3,13 @@ import { ChevronLeft, ChevronRight, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MonthlySummaryDashboard } from './components/MonthlySummaryDashboard';
-import { IncomeSourceForm } from './components/IncomeSourceForm';
 import { ExpectedIncomeSchedule } from './components/ExpectedIncomeSchedule';
 import { useAuth } from './contexts/AuthContext';
 import { Login } from './components/Login';
 import { PlanSelector } from './components/PlanSelector';
-import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseSchedule } from './components/ExpenseSchedule';
 import { AccountProfileModal } from './components/AccountProfileModal';
 import { ThemeToggle } from './components/ThemeToggle';
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
@@ -86,12 +83,6 @@ function Dashboard() {
 
         {/* Dashboard Widgets */}
         <MonthlySummaryDashboard year={year} month={month} />
-
-        {/* Action Area */}
-        <div className="mb-8 flex gap-4">
-          <IncomeSourceForm />
-          <ExpenseForm />
-        </div>
 
         {/* The Planner View */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
