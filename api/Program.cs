@@ -57,7 +57,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // ==== CORS Policy ====
 var allowedOriginsStr = builder.Configuration["AllowedOrigins"] ?? "http://localhost:5173,http://localhost:3000";
-var allowedOrigins = allowedOriginsStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+var allowedOrigins = allowedOriginsStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .Concat(new[] { "https://cashmap.mytradingtoolbox.com", "https://opus.mytradingtoolbox.com", "https://mytradingtoolbox.com" })
+    .ToArray();
 
 builder.Services.AddCors(options =>
 {
