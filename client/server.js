@@ -16,7 +16,7 @@ app.use(express.static(join(__dirname, 'dist')));
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // Standard SPA wildcard fallback to seamlessly support React Router
-app.get('*', (req, res) => {
+app.get(/(.*)/, (req, res) => {
     res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
