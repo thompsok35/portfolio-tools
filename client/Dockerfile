@@ -1,0 +1,50 @@
+# Build Stage
+FROM node:22-alpine AS build
+
+# Set the working directory strictly inside the container
+WORKDIR /app
+
+# Copy isolated package bindings gracefully for layer caching
+COPY package.json package-lock.json ./
+
+# Install explicit production compilation dependencies
+RUN npm ci
+
+# Copy the entire client scope context
+COPY . .
+
+# Compile the final statically isolated Vite bundle
+RUN npm run build
+
+# Serve Stage
+FROM nginx:alpine
+
+# Flush default Nginx configs dynamically
+RUN rm -rf /etc/nginx/conf.d/*
+
+# Inject the flawless Opus default mapping to permanently override Railway port mappings dynamically
+RUN echo 'server { \
+    listen       ${PORT:-80}; \
+    server_name  localhost; \
+    location / { \
+        root   /usr/share/nginx/html; \
+        index  index.html index.htm; \
+        try_files $uri $uri/ /index.html; \
+    } \
+    error_page   500 502 503 504  /50x.html; \
+    location = /50x.html { \
+        root   /usr/share/nginx/html; \
+    } \
+}' > /etc/nginx/templates/default.conf.template
+
+# Native Linux injection to handle strictly parsed PORT variables natively
+RUN apk add --no-cache gettext
+
+# Retrieve the explicitly compiled dist file from the builder phase
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose native 80 dynamically
+EXPOSE 80
+
+# Spin up Nginx in the foreground reliably
+CMD ["nginx", "-g", "daemon off;"]
