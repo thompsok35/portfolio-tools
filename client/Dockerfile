@@ -4,6 +4,10 @@ FROM node:22-alpine AS build
 # Set the working directory strictly inside the container
 WORKDIR /app
 
+# Pass the API URL at build time
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # Copy isolated package bindings gracefully for layer caching
 COPY package.json package-lock.json ./
 
@@ -18,6 +22,9 @@ RUN npm run build
 
 # Serve Stage
 FROM nginx:alpine
+
+# Create the missing directory
+RUN mkdir -p /etc/nginx/templates
 
 # Flush default Nginx configs dynamically
 RUN rm -rf /etc/nginx/conf.d/*
