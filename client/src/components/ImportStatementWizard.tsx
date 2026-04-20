@@ -14,7 +14,7 @@ interface ImportStatementWizardProps {
     expectedIncomes: ExpectedIncomeItem[];
 }
 
-type WizardStep = 'upload' | 'mapping' | 'preview' | 'apply';
+type WizardStep = 'upload' | 'mapping' | 'selection' | 'preview' | 'apply';
 
 export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIncomes }: ImportStatementWizardProps) => {
     const { activePlanId } = useAuth();
@@ -37,6 +37,12 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
     // Computation
     const [totalRealized, setTotalRealized] = useState(0);
     const [symbolTotals, setSymbolTotals] = useState<Record<string, number>>({});
+
+    const [selectedRowIndexes, setSelectedRowIndexes] = useState<Set<number>>(new Set());
+    const [symbolFilter, setSymbolFilter] = useState('');
+
+    const targetType = expectedIncomes.find(i => i.id === targetSourceId)?.type || '';
+    const isOptionMode = targetType === 'Option Premium';
 
     const { data: profiles = [] } = useQuery({
         queryKey: ['csvProfiles', activePlanId],
@@ -80,6 +86,8 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
         setDividendKeyword('');
         setTotalRealized(0);
         setSymbolTotals({});
+        setSelectedRowIndexes(new Set());
+        setSymbolFilter('');
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,7 +207,7 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
                             <span className="text-xs font-semibold uppercase tracking-wide">Map</span>
                         </div>
                         <div className="flex-1 h-0.5 bg-slate-200 mx-4"></div>
-                        <div className={`flex flex-col items-center ${step === 'preview' ? 'text-indigo-500' : 'text-slate-400'}`}>
+                        <div className={`flex flex-col items-center ${(step === 'preview' || step === 'selection') ? 'text-indigo-500' : 'text-slate-400'}`}>
                             <div className="h-8 w-8 rounded-full border-2 border-current flex items-center justify-center font-bold mb-1">3</div>
                             <span className="text-xs font-semibold uppercase tracking-wide">Verify</span>
                         </div>
@@ -271,10 +279,12 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
                                         {headers.map(h => <option key={h} value={h}>{h}</option>)}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-color-text-muted uppercase mb-1">Dividend Keyword</label>
-                                    <input type="text" value={dividendKeyword} onChange={e => setDividendKeyword(e.target.value)} placeholder="e.g., 'Dividend'" className="w-full bg-color-surface border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg p-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
-                                </div>
+                                {!isOptionMode && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-color-text-muted uppercase mb-1">Dividend Keyword</label>
+                                        <input type="text" value={dividendKeyword} onChange={e => setDividendKeyword(e.target.value)} placeholder="e.g., 'Dividend'" className="w-full bg-color-surface border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg p-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-xs font-semibold text-color-text-muted uppercase mb-1">Amount Column</label>
                                     <select value={amountColumn} onChange={e => setAmountColumn(e.target.value)} className="w-full bg-color-surface border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg p-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
@@ -300,10 +310,96 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
                         </div>
                     )}
 
+                    {step === 'selection' && (
+                        <div className="space-y-4 animate-in fade-in duration-300 h-full flex flex-col">
+                            <div className="flex gap-4 mb-4 shrink-0">
+                                <div className="flex-1">
+                                    <label className="block text-xs font-semibold text-color-text-muted uppercase mb-1">Filter by Symbol</label>
+                                    <input 
+                                        type="text" 
+                                        value={symbolFilter} 
+                                        onChange={e => setSymbolFilter(e.target.value.toUpperCase())}
+                                        placeholder="e.g., AAPL"
+                                        className="w-full bg-color-surface border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg p-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex-1 overflow-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+                                <table className="w-full text-sm text-left text-color-text-main">
+                                    <thead className="text-xs text-color-text-muted uppercase bg-slate-50 dark:bg-slate-800 sticky top-0">
+                                        <tr>
+                                            <th className="px-4 py-3 w-10">
+                                                <input type="checkbox" onChange={(e) => {
+                                                    const newVisibleSet = new Set(selectedRowIndexes);
+                                                    previewData.forEach((row, i) => {
+                                                        const sym = (String(row[symbolColumn]) || '').toUpperCase();
+                                                        if (symbolFilter === '' || sym.includes(symbolFilter)) {
+                                                            if (e.target.checked) newVisibleSet.add(i);
+                                                            else newVisibleSet.delete(i);
+                                                        }
+                                                    });
+                                                    setSelectedRowIndexes(newVisibleSet);
+                                                }} />
+                                            </th>
+                                            <th className="px-4 py-3">Date</th>
+                                            <th className="px-4 py-3">Symbol</th>
+                                            <th className="px-4 py-3">Action</th>
+                                            <th className="px-4 py-3 text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {previewData.map((row, i) => {
+                                            const sym = (String(row[symbolColumn]) || '').toUpperCase();
+                                            if (symbolFilter !== '' && !sym.includes(symbolFilter)) return null;
+
+                                            return (
+                                                <tr key={i} className={`border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedRowIndexes.has(i) ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}>
+                                                    <td className="px-4 py-3">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={selectedRowIndexes.has(i)}
+                                                            onChange={(e) => {
+                                                                const newSet = new Set(selectedRowIndexes);
+                                                                if (e.target.checked) newSet.add(i);
+                                                                else newSet.delete(i);
+                                                                setSelectedRowIndexes(newSet);
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td className="px-4 py-3">{dateColumn ? row[dateColumn] : '-'}</td>
+                                                    <td className="px-4 py-3 font-semibold">{row[symbolColumn]}</td>
+                                                    <td className="px-4 py-3">{row[actionColumn]}</td>
+                                                    <td className="px-4 py-3 text-right font-mono">
+                                                        {row[amountColumn]}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div className="shrink-0 pt-4 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
+                                <span className="text-sm text-color-text-muted">{selectedRowIndexes.size} items selected</span>
+                                <div className="text-right flex items-center">
+                                    <span className="text-xs uppercase tracking-wider font-semibold text-color-text-muted mr-3">Calculated PnL:</span>
+                                    <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                                        ${Array.from(selectedRowIndexes).reduce((sum, i) => {
+                                            const valStr = String(previewData[i][amountColumn] || '').replace(/[^0-9.-]+/g, "");
+                                            const val = parseFloat(valStr);
+                                            return sum + (isNaN(val) ? 0 : val);
+                                        }, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {step === 'preview' && (
                         <div className="space-y-6 animate-in fade-in duration-300">
                              <div className="text-center p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <h4 className="text-sm font-semibold text-color-text-muted uppercase tracking-wider mb-2">Calculated Realized Dividends</h4>
+                                <h4 className="text-sm font-semibold text-color-text-muted uppercase tracking-wider mb-2">Calculated Realized Income</h4>
                                 <div className="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 mb-2">
                                     ${totalRealized.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
@@ -334,11 +430,48 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
                     </button>
                     {step === 'mapping' && (
                         <button 
-                            disabled={!targetSourceId || !actionColumn || !dividendKeyword || !amountColumn}
-                            onClick={handleMappingSubmit} 
+                            disabled={!targetSourceId || !actionColumn || !amountColumn || (!isOptionMode && !dividendKeyword)}
+                            onClick={() => {
+                                if (selectedProfileId === 'new' && brokerName) {
+                                    saveProfileMutation.mutate({
+                                        planId: activePlanId as string,
+                                        brokerName,
+                                        dateColumn,
+                                        dateFormat: 'auto',
+                                        symbolColumn,
+                                        actionColumn,
+                                        amountColumn,
+                                        dividendKeyword: isOptionMode ? '' : dividendKeyword,
+                                        optionKeyword: ''
+                                    });
+                                }
+
+                                if (isOptionMode) {
+                                    setStep('selection');
+                                } else {
+                                    handleMappingSubmit();
+                                }
+                            }} 
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Calculate Realized <ChevronRight className="w-4 h-4" />
+                            Next Step <ChevronRight className="w-4 h-4" />
+                        </button>
+                    )}
+                    {step === 'selection' && (
+                        <button 
+                            disabled={selectedRowIndexes.size === 0 || reconcileMutation.isPending}
+                            onClick={() => {
+                                const sum = Array.from(selectedRowIndexes).reduce((s, i) => {
+                                    const valStr = String(previewData[i][amountColumn] || '').replace(/[^0-9.-]+/g, "");
+                                    const val = parseFloat(valStr);
+                                    return s + (isNaN(val) ? 0 : val);
+                                }, 0);
+                                reconcileMutation.mutate(sum);
+                            }} 
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+                        >
+                            <CheckCircle2 className="w-4 h-4" /> 
+                            {reconcileMutation.isPending ? 'Saving...' : 'Reconcile Options'}
                         </button>
                     )}
                     {step === 'preview' && (

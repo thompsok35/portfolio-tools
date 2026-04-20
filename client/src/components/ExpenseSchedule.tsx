@@ -5,7 +5,12 @@ import { useState } from 'react';
 import { ExpenseForm } from './ExpenseForm';
 import { useAuth } from '../contexts/AuthContext';
 
-export const ExpenseSchedule = () => {
+interface ExpenseScheduleProps {
+    year: number;
+    month: number;
+}
+
+export const ExpenseSchedule = ({ year, month }: ExpenseScheduleProps) => {
     const { activePlanId } = useAuth();
     const queryClient = useQueryClient();
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -103,7 +108,32 @@ export const ExpenseSchedule = () => {
     if (isLoading) return <div className="text-center p-8 text-color-text-muted">Loading expenses...</div>;
     if (error) return <div className="text-center p-8 text-color-danger">Failed to load expenses.</div>;
 
-    const expenseList = expenses || [];
+    const isExpenseExpectedInMonth = (expense: any, targetYear: number, targetMonth: number) => {
+        if (!expense.targetDate) return true; // Just in case data is missing
+        const targetDate = new Date(expense.targetDate);
+        const expYear = targetDate.getUTCFullYear();
+        const expMonth = targetDate.getUTCMonth() + 1; // 1-indexed
+
+        if (expYear > targetYear || (expYear === targetYear && expMonth > targetMonth)) {
+            return false;
+        }
+
+        switch (expense.frequency) {
+            case 0: // OneTime
+                return expYear === targetYear && expMonth === targetMonth;
+            case 1: // Monthly
+                return true;
+            case 2: // Quarterly
+                const monthsDiff = ((targetYear - expYear) * 12) + targetMonth - expMonth;
+                return monthsDiff % 3 === 0;
+            case 3: // Yearly
+                return expMonth === targetMonth;
+            default:
+                return false;
+        }
+    };
+
+    const expenseList = (expenses || []).filter(e => isExpenseExpectedInMonth(e, year, month));
 
     // Organize expenses into groups
     const groupedExpenses: Record<string, typeof expenseList> = {};

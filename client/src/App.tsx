@@ -87,7 +87,7 @@ function Dashboard() {
         {/* The Planner View */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <ExpectedIncomeSchedule year={year} month={month} />
-          <ExpenseSchedule />
+          <ExpenseSchedule year={year} month={month} />
         </div>
 
         <AccountProfileModal
