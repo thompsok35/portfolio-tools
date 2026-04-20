@@ -23,15 +23,35 @@ export const MonthlySummaryDashboard = ({ year, month }: MonthlySummaryProps) =>
     const netValue = summary?.netSurplusDeficit || 0;
     const isSurplus = netValue >= 0;
 
+    const hasAnyReconciled = summary?.expectedIncomes.some(i => i.isReconciled) || false;
+    const isFullyReconciled = summary?.expectedIncomes.length ? summary.expectedIncomes.every(i => i.isReconciled) : false;
+    const realizedIncome = summary?.expectedIncomes.filter(i => i.isReconciled).reduce((sum, i) => sum + i.realizedAmount, 0) || 0;
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Total Income */}
             <div className="bg-color-surface rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-medium text-color-text-muted mb-1">Total Expected Income</p>
+                    <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-medium text-color-text-muted">Total Expected Income</p>
+                        {isFullyReconciled ? (
+                            <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Reconciled
+                            </span>
+                        ) : hasAnyReconciled ? (
+                            <span className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Partially Reconciled
+                            </span>
+                        ) : null}
+                    </div>
                     <h3 className="text-3xl font-bold text-color-text-main">
                         ${summary?.totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h3>
+                    {hasAnyReconciled && (
+                        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
+                            Realized: ${realizedIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                    )}
                     <p className="text-xs font-semibold text-color-text-muted mt-1.5 opacity-80">
                         YTD: ${summary?.ytdIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                     </p>

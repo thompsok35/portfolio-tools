@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Data;
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260420133122_AddCsvProfilesAndReconciliation")]
+    partial class AddCsvProfilesAndReconciliation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,7 +191,7 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0bdba5ec-9ca6-4202-b8a6-9c25a479eea2"),
+                            Id = new Guid("31a12bd2-a501-4a69-b24c-5d213472eb04"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Rent/Mortgage",
@@ -198,7 +201,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("06e36d8a-b16b-40f8-af69-477b29305cba"),
+                            Id = new Guid("b3b098c8-5cc5-4cd4-a1c6-17331c27c7c1"),
                             Frequency = 0,
                             IsFixed = false,
                             Name = "Groceries",
@@ -208,7 +211,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0dd78fe7-efc5-48c0-8b3d-54656ff3d4f6"),
+                            Id = new Guid("dc6a1733-49b0-4c08-8e6f-b64aa7c559a0"),
                             Frequency = 0,
                             IsFixed = true,
                             Name = "Healthcare",
@@ -216,35 +219,6 @@ namespace api.Migrations
                             PlannedAmount = 350.00m,
                             TargetDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("api.Models.IncomeReconciliation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("IncomeSourceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("PlanId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("RealizedAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("IncomeReconciliations");
                 });
 
             modelBuilder.Entity("api.Models.IncomeSource", b =>
@@ -280,6 +254,35 @@ namespace api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IncomeSources");
+                });
+
+            modelBuilder.Entity("api.Models.MonthlyReconciliation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsReconciled")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("RealizedExpenses")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("RealizedIncome")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MonthlyReconciliations");
                 });
 
             modelBuilder.Entity("api.Models.Plan", b =>

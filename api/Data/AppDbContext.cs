@@ -18,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<PortfolioIntegration> PortfolioIntegrations { get; set; }
     public DbSet<BankAccount> BankAccounts { get; set; }
     public DbSet<PlanShare> PlanShares { get; set; }
+    public DbSet<CsvImportProfile> CsvImportProfiles { get; set; }
+    public DbSet<IncomeReconciliation> IncomeReconciliations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

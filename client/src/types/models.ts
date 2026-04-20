@@ -38,6 +38,11 @@ export interface AppConfigCategory {
     value: string;
 }
 
+export interface ExpectedIncomeItem extends IncomeSource {
+    isReconciled: boolean;
+    realizedAmount: number;
+}
+
 export interface SummaryDashboardStats {
     totalIncome: number;
     totalExpenses: number;
@@ -45,7 +50,28 @@ export interface SummaryDashboardStats {
     ytdIncome: number;
     ytdExpenses: number;
     ytdNetSurplusDeficit: number;
-    expectedIncomes: IncomeSource[];
+    expectedIncomes: ExpectedIncomeItem[];
+}
+
+export interface CsvImportProfile {
+    id?: string;
+    planId: string;
+    brokerName: string;
+    dateColumn: string;
+    dateFormat: string;
+    symbolColumn: string;
+    actionColumn: string;
+    amountColumn: string;
+    dividendKeyword: string;
+    optionKeyword: string;
+}
+
+export interface ReconcileRequest {
+    planId: string;
+    incomeSourceId: string;
+    year: number;
+    month: number;
+    realizedIncome: number;
 }
 
 export interface UserProfile {

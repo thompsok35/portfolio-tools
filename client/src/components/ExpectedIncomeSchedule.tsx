@@ -7,6 +7,7 @@ import { IncomeSourceForm } from './IncomeSourceForm';
 import { LinkedIncomeButton } from './LinkedIncomeButton';
 import { useAuth } from '../contexts/AuthContext';
 import { LayoutGrid, List } from 'lucide-react';
+import { ImportStatementWizard } from './ImportStatementWizard';
 
 interface ExpectedIncomeScheduleProps {
     year: number;
@@ -26,6 +27,10 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
+
+    const now = new Date();
+    const isPastOrCurrentMonth = year < now.getFullYear() || (year === now.getFullYear() && month <= now.getMonth() + 1);
 
     const { data: summary, isLoading, error } = useQuery({
         queryKey: ['monthlySummary', year, month, activePlanId],
@@ -66,6 +71,15 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                     <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                         <IncomeSourceForm />
                         <LinkedIncomeButton />
+                        {isPastOrCurrentMonth && (
+                            <button
+                                onClick={() => setIsWizardOpen(true)}
+                                className="p-1.5 rounded-md transition-colors text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20"
+                                title="Import past statements to reconcile actual income"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
+                            </button>
+                        )}
                     </div>
                     <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                         <button
@@ -127,7 +141,14 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                             ) : viewMode === 'cards' ? (
                                 <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 hover:shadow-md transition-shadow relative h-full">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h4 className="font-semibold text-color-text-main pr-16">{income.source}</h4>
+                                        <div className="pr-16 flex flex-col gap-1">
+                                            <h4 className="font-semibold text-color-text-main">{income.source}</h4>
+                                            {income.isReconciled && (
+                                                <span className="text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-sm uppercase w-max">
+                                                    Reconciled
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="absolute top-4 right-4 flex gap-1">
                                             <button
                                                 onClick={() => setEditingId(income.id)}
@@ -153,10 +174,17 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                     </div>
 
                                     <div className="flex items-center gap-2 mb-2 text-color-text-muted">
-                                        <DollarSign className="h-4 w-4" />
-                                        <span className="text-lg font-bold text-color-text-main">
-                                            ${income.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </span>
+                                        <DollarSign className="h-4 w-4 shrink-0" />
+                                        <div className="flex flex-col">
+                                            <span className={`text-lg font-bold ${income.isReconciled ? 'text-slate-400 dark:text-slate-500 line-through text-sm' : 'text-color-text-main'}`}>
+                                                ${income.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                            {income.isReconciled && (
+                                                <span className="text-emerald-500 font-bold">
+                                                    ${income.realizedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center gap-2 text-sm text-color-text-muted">
@@ -173,15 +201,29 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                             ) : (
                                 <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
                                     <div className="flex-1 font-semibold text-color-text-main truncate pr-4">
-                                        {income.source}
+                                        <div className="flex items-center gap-2">
+                                            <span>{income.source}</span>
+                                            {income.isReconciled && (
+                                                <span className="text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-sm uppercase align-middle shrink-0">
+                                                    Reconciled
+                                                </span>
+                                            )}
+                                        </div>
                                         {income.description && (
-                                            <span className="ml-2 text-xs font-normal text-color-text-muted hidden xl:inline">
-                                                - {income.description}
+                                            <span className="text-xs font-normal text-color-text-muted hidden xl:block truncate mt-0.5">
+                                                {income.description}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="w-28 shrink-0 text-right font-bold text-color-text-main">
-                                        ${income.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    <div className="w-28 shrink-0 text-right flex flex-col items-end justify-center">
+                                        <div className={`font-bold ${income.isReconciled ? 'text-slate-400 dark:text-slate-500 text-xs line-through' : 'text-color-text-main'}`}>
+                                            ${income.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
+                                        {income.isReconciled && (
+                                            <div className="text-emerald-500 font-bold text-sm">
+                                                ${income.realizedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex gap-1 shrink-0 ml-2">
                                         <button
@@ -205,6 +247,14 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                     ))}
                 </div>
             )}
+            
+            <ImportStatementWizard 
+                isOpen={isWizardOpen} 
+                onClose={() => setIsWizardOpen(false)} 
+                year={year} 
+                month={month} 
+                expectedIncomes={expectedIncomes}
+            />
         </div>
     );
 };

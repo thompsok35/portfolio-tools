@@ -4,6 +4,12 @@ using api.Models;
 
 namespace api.Services;
 
+public class ExpectedIncomeItem : IncomeSource
+{
+    public bool IsReconciled { get; set; }
+    public decimal RealizedAmount { get; set; }
+}
+
 public class SummaryDashboardStats
 {
     public decimal TotalIncome { get; set; }
@@ -12,7 +18,7 @@ public class SummaryDashboardStats
     public decimal YTDIncome { get; set; }
     public decimal YTDExpenses { get; set; }
     public decimal YTDNetSurplusDeficit => YTDIncome - YTDExpenses;
-    public List<IncomeSource> ExpectedIncomes { get; set; } = new List<IncomeSource>();
+    public List<ExpectedIncomeItem> ExpectedIncomes { get; set; } = new List<ExpectedIncomeItem>();
 }
 
 public class SummaryService
@@ -26,6 +32,11 @@ public class SummaryService
 
     public async Task<SummaryDashboardStats> GetMonthlySummaryAsync(int year, int month, Guid planId)
     {
+        // Fetch all reconciliations for this plan up to the target month for YTD calculations
+        var reconciliations = await _context.IncomeReconciliations
+            .Where(r => r.PlanId == planId && r.Year == year && r.Month <= month)
+            .ToListAsync();
+
         // 1. Calculate Total Expected Expenses
         var allExpenses = await _context.ExpenseCategories
             .Where(e => e.PlanId == planId)
@@ -47,14 +58,27 @@ public class SummaryService
         
         decimal expectedIncome = 0;
 
-        var expectedIncomeItems = new List<IncomeSource>();
+        var expectedIncomeItems = new List<ExpectedIncomeItem>();
 
         foreach (var income in allIncome)
         {
             if (IsIncomeExpectedInMonth(income, year, month))
             {
                 expectedIncome += income.Amount;
-                expectedIncomeItems.Add(income);
+                var rec = reconciliations.FirstOrDefault(r => r.IncomeSourceId == income.Id && r.Month == month);
+                expectedIncomeItems.Add(new ExpectedIncomeItem
+                {
+                    Id = income.Id,
+                    Amount = income.Amount,
+                    Source = income.Source,
+                    Type = income.Type,
+                    Frequency = income.Frequency,
+                    TargetDate = income.TargetDate,
+                    Description = income.Description,
+                    PlanId = income.PlanId,
+                    IsReconciled = rec != null,
+                    RealizedAmount = rec?.RealizedAmount ?? 0
+                });
             }
         }
 
@@ -64,18 +88,31 @@ public class SummaryService
 
         for (int m = 1; m <= month; m++)
         {
+            // Expenses
+            decimal mExpenses = 0;
             foreach (var expense in allExpenses)
             {
                 if (IsExpenseExpectedInMonth(expense, year, m))
                 {
-                    ytdExpenses += expense.PlannedAmount;
+                    mExpenses += expense.PlannedAmount;
                 }
             }
+            ytdExpenses += mExpenses;
+
+            // Income: Evaluate individually per month. Use Realized if reconciled, else Expected.
             foreach (var income in allIncome)
             {
                 if (IsIncomeExpectedInMonth(income, year, m))
                 {
-                    ytdIncome += income.Amount;
+                    var rec = reconciliations.FirstOrDefault(r => r.IncomeSourceId == income.Id && r.Month == m);
+                    if (rec != null)
+                    {
+                        ytdIncome += rec.RealizedAmount;
+                    }
+                    else
+                    {
+                        ytdIncome += income.Amount;
+                    }
                 }
             }
         }

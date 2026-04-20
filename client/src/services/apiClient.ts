@@ -160,6 +160,46 @@ export const apiClient = {
         return res.json();
     },
 
+    reconcileMonth: async (data: { planId: string, incomeSourceId: string, year: number, month: number, realizedIncome: number }): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/Summary/reconcile`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to reconcile month');
+    },
+
+    // Csv Profiles
+    getCsvImportProfiles: async (planId: string): Promise<any[]> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/CsvImportProfiles?planId=${planId}`);
+        if (!res.ok) throw new Error('Failed to fetch csv import profiles');
+        return res.json();
+    },
+
+    createCsvImportProfile: async (data: any): Promise<any> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/CsvImportProfiles`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to create csv import profile');
+        return res.json();
+    },
+
+    updateCsvImportProfile: async (id: string, data: any): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/CsvImportProfiles/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to update csv import profile');
+    },
+
+    deleteCsvImportProfile: async (id: string): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/CsvImportProfiles/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete csv import profile');
+    },
+
     // Configurations
     getConfigByGroup: async (group: string): Promise<AppConfigCategory[]> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/AppConfig/${group}`);

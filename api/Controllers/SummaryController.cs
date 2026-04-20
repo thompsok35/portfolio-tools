@@ -60,4 +60,40 @@ public class SummaryController : ControllerBase
         var summary = await _summaryService.GetMonthlySummaryAsync(year, month, planId);
         return Ok(summary);
     }
+
+    public class ReconcileRequest
+    {
+        public Guid PlanId { get; set; }
+        public Guid IncomeSourceId { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public decimal RealizedIncome { get; set; }
+    }
+
+    [HttpPost("reconcile")]
+    public async Task<IActionResult> ReconcileMonth([FromBody] ReconcileRequest request)
+    {
+        if (!await HasPlanAccessAsync(request.PlanId)) return Forbid();
+
+        var record = await _context.IncomeReconciliations
+            .FirstOrDefaultAsync(r => r.PlanId == request.PlanId && r.IncomeSourceId == request.IncomeSourceId && r.Year == request.Year && r.Month == request.Month);
+
+        if (record == null)
+        {
+            record = new api.Models.IncomeReconciliation
+            {
+                Id = Guid.NewGuid(),
+                PlanId = request.PlanId,
+                IncomeSourceId = request.IncomeSourceId,
+                Year = request.Year,
+                Month = request.Month
+            };
+            _context.IncomeReconciliations.Add(record);
+        }
+
+        record.RealizedAmount = request.RealizedIncome;
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Income source reconciled successfully." });
+    }
 }
