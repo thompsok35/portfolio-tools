@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
-import { Calendar, DollarSign, CalendarDays, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, DollarSign, CalendarDays, Edit2, Trash2, CalendarClock } from 'lucide-react';
 import type { IncomeFrequency } from '../types/models';
 import { useState } from 'react';
 import { IncomeSourceForm } from './IncomeSourceForm';
@@ -8,6 +8,7 @@ import { LinkedIncomeButton } from './LinkedIncomeButton';
 import { useAuth } from '../contexts/AuthContext';
 import { LayoutGrid, List } from 'lucide-react';
 import { ImportStatementWizard } from './ImportStatementWizard';
+import { IncomeTimelineView } from './IncomeTimelineView';
 
 interface ExpectedIncomeScheduleProps {
     year: number;
@@ -26,7 +27,7 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
     const queryClient = useQueryClient();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards');
+    const [viewMode, setViewMode] = useState<'cards' | 'list' | 'timeline'>('cards');
     const [isWizardOpen, setIsWizardOpen] = useState(false);
 
     const now = new Date();
@@ -96,6 +97,13 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                         >
                             <List className="h-4 w-4" />
                         </button>
+                        <button
+                            onClick={() => setViewMode('timeline')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'timeline' ? 'bg-color-surface shadow-sm text-color-primary' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                            title="Timeline View"
+                        >
+                            <CalendarClock className="h-4 w-4" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -104,6 +112,12 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                 <div className="text-center p-12 text-color-text-muted border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
                     No expected income for this period. Use the form above to register recurring items.
                 </div>
+            ) : viewMode === 'timeline' ? (
+                <IncomeTimelineView 
+                    year={year} 
+                    month={month} 
+                    expectedIncomes={expectedIncomes} 
+                />
             ) : (
                 <div className={viewMode === 'cards' ? "grid gap-4 items-start md:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-3"}>
                     {expectedIncomes.map((income) => (
@@ -192,6 +206,18 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                         <span>{frequencyMap[income.frequency]}</span>
                                     </div>
 
+                                    <div className="text-[11px] text-color-text-muted mt-3 pt-3 border-t border-slate-200 dark:border-slate-800/80 flex justify-between items-center">
+                                        <span>Expected Realization Date:</span>
+                                        <span className="font-semibold text-color-text-main">
+                                            {new Date(income.targetDate).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                timeZone: 'UTC'
+                                            })}
+                                        </span>
+                                    </div>
+
                                     {income.description && (
                                         <p className="text-sm text-color-text-muted mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
                                             {income.description}
@@ -200,7 +226,7 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                 </div>
                             ) : (
                                 <div className="border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
-                                    <div className="flex-1 font-semibold text-color-text-main truncate pr-4">
+                                    <div className="flex-1 font-semibold text-color-text-main pr-4">
                                         <div className="flex items-center gap-2">
                                             <span>{income.source}</span>
                                             {income.isReconciled && (
@@ -209,8 +235,22 @@ export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeSchedulePr
                                                 </span>
                                             )}
                                         </div>
+                                        
+                                        <div className="flex flex-wrap items-center gap-x-2 text-xs font-normal text-color-text-muted mt-1">
+                                            <span className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-[10px] font-medium">
+                                                {income.type}
+                                            </span>
+                                            <span>•</span>
+                                            <span>{frequencyMap[income.frequency]}</span>
+                                            <span>•</span>
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="h-3 w-3" />
+                                                Target: {new Date(income.targetDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
+                                            </span>
+                                        </div>
+
                                         {income.description && (
-                                            <span className="text-xs font-normal text-color-text-muted hidden xl:block truncate mt-0.5">
+                                            <span className="text-xs font-normal text-color-text-muted hidden xl:block truncate mt-1">
                                                 {income.description}
                                             </span>
                                         )}
