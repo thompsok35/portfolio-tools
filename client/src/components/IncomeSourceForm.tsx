@@ -121,14 +121,17 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                         value={formData.type}
                         onChange={e => setFormData({ ...formData, type: e.target.value })}
                     >
-                        <option value="Dividend">Dividend</option>
-                        <option value="Option Premium">Option Premium</option>
-                        <option value="IT Contract">IT Contract</option>
-                        <option value="Rental">Rental</option>
-                        {/* Render dynamic ones fetched from backend */}
-                        {incomeTypes?.map(type => (
-                            <option key={type.id} value={type.value}>{type.value}</option>
+                        {/* Render static defaults first */}
+                        {["Dividend", "Option Premium", "IT Contract", "Rental"].map(t => (
+                            <option key={t} value={t}>{t}</option>
                         ))}
+                        {/* Render dynamic ones fetched from backend, filtering out duplicates */}
+                        {incomeTypes
+                            ?.filter(type => !["Dividend", "Option Premium", "IT Contract", "Rental"].includes(type.value))
+                            ?.map(type => (
+                                <option key={type.id} value={type.value}>{type.value}</option>
+                            ))
+                        }
                     </select>
                 </div>
 
