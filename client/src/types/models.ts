@@ -1,4 +1,4 @@
-export type IncomeFrequency = 0 | 1 | 2 | 3; // BiWeekly, Monthly, Quarterly, Yearly
+export type IncomeFrequency = 0 | 1 | 2 | 3 | 4; // BiWeekly, Monthly, Quarterly, Yearly, OneTime
 export type ExpenseFrequency = 0 | 1 | 2 | 3; // OneTime, Monthly, Quarterly, Yearly
 
 export interface Plan {

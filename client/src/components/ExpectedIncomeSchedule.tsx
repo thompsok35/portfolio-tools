@@ -19,7 +19,8 @@ const frequencyMap: Record<IncomeFrequency, string> = {
     0: 'Bi-Weekly',
     1: 'Monthly',
     2: 'Quarterly',
-    3: 'Yearly'
+    3: 'Yearly',
+    4: 'One-Time'
 };
 
 export const ExpectedIncomeSchedule = ({ year, month }: ExpectedIncomeScheduleProps) => {

@@ -146,6 +146,7 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
                         <option value={1}>Monthly</option>
                         <option value={2}>Quarterly</option>
                         <option value={3}>Yearly</option>
+                        <option value={4}>One-Time</option>
                     </select>
                 </div>
 

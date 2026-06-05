@@ -141,6 +141,9 @@ public class SummaryService
 
         switch (income.Frequency)
         {
+            case IncomeFrequency.OneTime:
+                return income.TargetDate.Year == targetYear && income.TargetDate.Month == targetMonth;
+
             case IncomeFrequency.Monthly:
                 return true; // Happens every month after start
                 

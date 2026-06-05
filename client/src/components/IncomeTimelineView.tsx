@@ -23,7 +23,8 @@ const frequencyMap: Record<IncomeFrequency, string> = {
     0: 'Bi-Weekly',
     1: 'Monthly',
     2: 'Quarterly',
-    3: 'Yearly'
+    3: 'Yearly',
+    4: 'One-Time'
 };
 
 export const IncomeTimelineView = ({ year, month, expectedIncomes }: IncomeTimelineViewProps) => {
@@ -66,6 +67,11 @@ export const IncomeTimelineView = ({ year, month, expectedIncomes }: IncomeTimel
 
             // If income starts after the target month, skip
             if (baseYear > year || (baseYear === year && baseMonth > month)) {
+                return;
+            }
+
+            // If One-Time and not in target month/year, skip
+            if (income.frequency === 4 && (baseYear !== year || baseMonth !== month)) {
                 return;
             }
 

@@ -5,7 +5,8 @@ public enum IncomeFrequency
     BiWeekly,
     Monthly,
     Quarterly,
-    Yearly
+    Yearly,
+    OneTime
 }
 
 public class IncomeSource
