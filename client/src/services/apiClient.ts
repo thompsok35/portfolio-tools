@@ -1,4 +1,4 @@
-import type { AppConfigCategory, ExpenseCategory, IncomeSource, SummaryDashboardStats, Plan, UserProfile, PortfolioIntegration, BankAccount } from '../types/models';
+import type { AppConfigCategory, ExpenseCategory, IncomeSource, SummaryDashboardStats, Plan, UserProfile, PortfolioIntegration, BankAccount, NamedIncomeSource, ReconcileRequest } from '../types/models';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
@@ -160,7 +160,7 @@ export const apiClient = {
         return res.json();
     },
 
-    reconcileMonth: async (data: { planId: string, incomeSourceId: string, year: number, month: number, realizedIncome: number }): Promise<void> => {
+    reconcileMonth: async (data: ReconcileRequest): Promise<void> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/Summary/reconcile`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -353,5 +353,27 @@ export const apiClient = {
     deleteBankAccount: async (id: string): Promise<void> => {
         const res = await fetchWithAuth(`${API_BASE_URL}/BankAccounts/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Failed to delete bank account');
+    },
+
+    // Named Income Sources
+    getNamedIncomeSources: async (): Promise<NamedIncomeSource[]> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/NamedIncomeSources`);
+        if (!res.ok) throw new Error('Failed to fetch named income sources');
+        return res.json();
+    },
+
+    createNamedIncomeSource: async (data: Omit<NamedIncomeSource, 'id'>): Promise<NamedIncomeSource> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/NamedIncomeSources`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to create named income source');
+        return res.json();
+    },
+
+    deleteNamedIncomeSource: async (id: string): Promise<void> => {
+        const res = await fetchWithAuth(`${API_BASE_URL}/NamedIncomeSources/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete named income source');
     }
 };

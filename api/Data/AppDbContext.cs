@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<IncomeSource> IncomeSources { get; set; }
+    public DbSet<NamedIncomeSource> NamedIncomeSources { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
     public DbSet<AppConfigCategory> AppConfigCategories { get; set; }
     public DbSet<User> Users { get; set; }
@@ -48,3 +49,4 @@ public class AppDbContext : DbContext
         );
     }
 }
+

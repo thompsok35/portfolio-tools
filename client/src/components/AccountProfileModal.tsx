@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CheckCircle, XCircle, Banknote, Shield, User, Users, Trash2, Plus, Zap, Loader2, Pencil } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
-import type { UserProfile, PortfolioIntegration, BankAccount, Plan, PlanShare } from '../types/models';
+import type { UserProfile, PortfolioIntegration, BankAccount, Plan, PlanShare, NamedIncomeSource } from '../types/models';
 
 interface Props {
     isOpen: boolean;
@@ -11,7 +11,7 @@ interface Props {
 
 export function AccountProfileModal({ isOpen, onClose }: Props) {
     const queryClient = useQueryClient();
-    const [activeTab, setActiveTab] = useState<'General' | 'Sharing' | 'Integrations' | 'Bank Accounts'>('General');
+    const [activeTab, setActiveTab] = useState<'General' | 'Sharing' | 'Integrations' | 'Bank Accounts' | 'Income Sources'>('General');
 
     // General Tab State
     const [accountName, setAccountName] = useState('');
@@ -45,6 +45,9 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
     const [bankAccountName, setBankAccountName] = useState('');
     const [accountType, setAccountType] = useState('Checking');
 
+    // Income Sources Tab State
+    const [newSourceName, setNewSourceName] = useState('');
+
     // Queries
     const { data: profile } = useQuery<UserProfile>({
         queryKey: ['profile'],
@@ -70,6 +73,12 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         queryKey: ['bankAccounts'],
         queryFn: apiClient.getBankAccounts,
         enabled: isOpen && activeTab === 'Bank Accounts'
+    });
+
+    const { data: namedIncomeSources = [] } = useQuery<NamedIncomeSource[]>({
+        queryKey: ['namedIncomeSources'],
+        queryFn: apiClient.getNamedIncomeSources,
+        enabled: isOpen && activeTab === 'Income Sources'
     });
 
     const { data: plans = [] } = useQuery<Plan[]>({
@@ -227,6 +236,23 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         }
     });
 
+    // Mutations - Income Sources
+    const createNamedIncomeSourceMutation = useMutation({
+        mutationFn: () => apiClient.createNamedIncomeSource({
+            name: newSourceName
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['namedIncomeSources'] });
+            setNewSourceName('');
+        }
+    });
+
+    const deleteNamedIncomeSourceMutation = useMutation({
+        mutationFn: (id: string) => apiClient.deleteNamedIncomeSource(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['namedIncomeSources'] });
+        }
+    });
 
     // Handlers
     const handleProfileSubmit = (e: React.FormEvent) => {
@@ -270,6 +296,13 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
         }
     };
 
+    const handleNamedIncomeSourceSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newSourceName.trim()) {
+            createNamedIncomeSourceMutation.mutate();
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -287,10 +320,10 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                 </div>
 
                 {/* Tabs Container */}
-                <div className="flex border-b border-slate-200 dark:border-slate-800 px-6">
+                <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 overflow-x-auto whitespace-nowrap scrollbar-thin">
                     <button
                         onClick={() => setActiveTab('General')}
-                        className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'General'
+                        className={`flex-1 min-w-[80px] py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'General'
                             ? 'border-indigo-600 text-indigo-600'
                             : 'border-transparent text-slate-500 hover:text-slate-700'
                             }`}
@@ -300,7 +333,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     </button>
                     <button
                         onClick={() => setActiveTab('Sharing')}
-                        className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Sharing'
+                        className={`flex-1 min-w-[80px] py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Sharing'
                             ? 'border-indigo-600 text-indigo-600'
                             : 'border-transparent text-slate-500 hover:text-slate-700'
                             }`}
@@ -310,7 +343,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     </button>
                     <button
                         onClick={() => setActiveTab('Integrations')}
-                        className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Integrations'
+                        className={`flex-1 min-w-[100px] py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Integrations'
                             ? 'border-indigo-600 text-indigo-600'
                             : 'border-transparent text-slate-500 hover:text-slate-700'
                             }`}
@@ -320,13 +353,23 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     </button>
                     <button
                         onClick={() => setActiveTab('Bank Accounts')}
-                        className={`flex-1 py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Bank Accounts'
+                        className={`flex-1 min-w-[120px] py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Bank Accounts'
                             ? 'border-indigo-600 text-indigo-600'
                             : 'border-transparent text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <Banknote className="w-4 h-4" />
                         Bank Accounts
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('Income Sources')}
+                        className={`flex-1 min-w-[120px] py-4 text-center text-sm font-medium border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'Income Sources'
+                            ? 'border-indigo-600 text-indigo-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-700'
+                            }`}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Income Sources
                     </button>
                 </div>
 
@@ -408,8 +451,8 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="Min. 6 characters"
                                                 required
-                                                minLength={6}
                                             />
                                         </div>
                                         <div>
@@ -420,7 +463,6 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                                 required
-                                                minLength={6}
                                             />
                                         </div>
                                     </div>
@@ -429,7 +471,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                         disabled={changePasswordMutation.isPending}
                                         className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
                                     >
-                                        {changePasswordMutation.isPending ? 'Updating...' : 'Change Password'}
+                                        {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
                                     </button>
                                 </form>
                             </div>
@@ -439,36 +481,59 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     {/* SHARING TAB */}
                     {activeTab === 'Sharing' && (
                         <div className="space-y-6">
-                            {/* Plan Sharing Details */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-color-text-main border-b border-slate-100 dark:border-slate-800 pb-2">Plan Access Control</h3>
-                                <div>
-                                    <label className="block text-sm font-medium text-color-text-main mb-1">Select Plan Scope</label>
-                                    <select
-                                        value={sharePlanId}
-                                        onChange={(e) => setSharePlanId(e.target.value)}
-                                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-900"
-                                    >
-                                        {plans.map(p => (
-                                            <option key={p.id} value={p.id}>{p.name}</option>
-                                        ))}
-                                    </select>
+                            <form onSubmit={handleInviteSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+                                <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
+                                    <Users className="w-4 h-4 text-indigo-600" />
+                                    Share Plan Access
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Select Plan</label>
+                                        <select
+                                            value={sharePlanId}
+                                            onChange={(e) => setSharePlanId(e.target.value)}
+                                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main bg-white dark:bg-slate-900"
+                                            required
+                                        >
+                                            {plans.map(p => (
+                                                <option key={p.id} value={p.id}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">User Email</label>
+                                        <input
+                                            type="email"
+                                            value={planShareEmail}
+                                            onChange={(e) => setPlanShareEmail(e.target.value)}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="partner@example.com"
+                                            required
+                                        />
+                                    </div>
                                 </div>
+                                <button
+                                    type="submit"
+                                    disabled={createPlanShareMutation.isPending}
+                                    className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
+                                >
+                                    {createPlanShareMutation.isPending ? 'Inviting...' : 'Invite User'}
+                                </button>
+                            </form>
 
-                                {planShares.length > 0 && (
+                            {planShares.length > 0 && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-color-text-main">Currently Shared Users</h3>
                                     <div className="space-y-2">
-                                        <div className="text-xs font-semibold text-color-text-muted uppercase tracking-wider mb-2">Active Invites</div>
-                                        {planShares.map(share => (
-                                            <div key={share.id} className="flex flex-row justify-between items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2 rounded-lg">
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-color-text-main">{share.sharedWithEmail}</span>
-                                                    <span className="text-xs text-color-text-muted flex items-center gap-1">
-                                                        <CheckCircle className="w-3 h-3 text-emerald-500" /> {share.status}
-                                                    </span>
+                                        {planShares.map((share) => (
+                                            <div key={share.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div>
+                                                    <div className="font-medium text-sm text-color-text-main">{share.sharedWithEmail}</div>
+                                                    <div className="text-xs text-indigo-500 font-medium mt-0.5">Status: {share.status}</div>
                                                 </div>
                                                 <button
                                                     onClick={() => share.id && deletePlanShareMutation.mutate(share.id)}
-                                                    className="p-1.5 text-rose-500 hover:bg-rose-100 rounded-md transition-colors"
+                                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                                                     title="Revoke Access"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -476,27 +541,8 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                             </div>
                                         ))}
                                     </div>
-                                )}
-
-                                <form onSubmit={handleInviteSubmit} className="flex flex-row gap-2">
-                                    <input
-                                        type="email"
-                                        value={planShareEmail}
-                                        onChange={(e) => setPlanShareEmail(e.target.value)}
-                                        className="flex-1 bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="collaborator@example.com"
-                                        required
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={createPlanShareMutation.isPending || plans.length === 0}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap flex items-center gap-1"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Share
-                                    </button>
-                                </form>
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -504,18 +550,18 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                     {activeTab === 'Integrations' && (
                         <div className="space-y-6">
 
-                            {/* Active Integrations List */}
+                            {/* Existing Integrations */}
                             {integrations.length > 0 && (
                                 <div className="space-y-3">
                                     <h3 className="text-sm font-semibold text-color-text-main">Active Integrations</h3>
                                     <div className="space-y-2">
                                         {integrations.map((integration) => {
+                                            const status = testStatus[integration.id!] || 'idle';
+                                            const message = testMessage[integration.id!] || '';
                                             const linkedPlan = plans.find(p => p.id === integration.planId);
-                                            const status = testStatus[integration.id || ''] || 'idle';
-                                            const message = testMessage[integration.id || ''] || '';
                                             return (
                                                 <div key={integration.id} className="p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg space-y-2">
-                                                    <div className="flex items-center justify-between">
+                                                    <div className="flex items-start justify-between">
                                                         <div>
                                                             <div className="font-medium text-color-text-main">{integration.nickname}</div>
                                                             {linkedPlan && (
@@ -600,9 +646,8 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                             <form id="integration-form" onSubmit={handleIntegrationSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
                                 <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
                                     <Plus className="w-4 h-4 text-indigo-600" />
-                                    {editingIntegrationId ? 'Edit Integration' : 'Portfolio Manager Add-On'}
+                                    {editingIntegrationId ? 'Edit Portfolio Integration' : 'Link Portfolio Integration'}
                                 </h3>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-medium text-color-text-main mb-1">Nickname</label>
@@ -610,17 +655,17 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                             type="text"
                                             value={nickname}
                                             onChange={(e) => setNickname(e.target.value)}
-                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="e.g. Robinhood API"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-color-text-main mb-1">Select Planner</label>
+                                        <label className="block text-xs font-medium text-color-text-main mb-1">Select Plan</label>
                                         <select
                                             value={integrationPlanId}
                                             onChange={(e) => setIntegrationPlanId(e.target.value)}
-                                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-900"
+                                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main bg-white dark:bg-slate-900"
                                             required
                                         >
                                             {plans.map(p => (
@@ -634,7 +679,7 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                             type="url"
                                             value={portfolioEndpointUrl}
                                             onChange={(e) => setPortfolioEndpointUrl(e.target.value)}
-                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="https://api.portfolio-service.com/v1"
                                             required
                                         />
@@ -645,30 +690,27 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                             type="text"
                                             value={accountNumber}
                                             onChange={(e) => setAccountNumber(e.target.value)}
-                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="e.g. 6YA49198"
-                                            title="Leave blank to sync everything, or explicitly scope to a specific account."
                                         />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-xs font-medium text-color-text-main mb-1">Secure API Access Token</label>
-                                        <input
-                                            type="password"
+                                        <textarea
                                             value={apiToken}
-                                            autoComplete="new-password"
                                             onChange={(e) => setApiToken(e.target.value)}
-                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-color-text-main focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
-                                            placeholder={editingIntegrationId ? 'Leave blank to keep existing...' : 'Paste secret token...'}
+                                            className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
+                                            placeholder={editingIntegrationId ? "Paste secret token to overwrite (leave empty to keep current)..." : "Paste secret token..."}
+                                            rows={2}
                                             required={!editingIntegrationId}
                                         />
                                     </div>
                                 </div>
-
-                                <div className="flex gap-3">
+                                <div className="flex items-center gap-2">
                                     <button
                                         type="submit"
-                                        disabled={createIntegrationMutation.isPending || updateIntegrationMutation.isPending || plans.length === 0}
-                                        className="flex-1 bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
+                                        disabled={updateIntegrationMutation.isPending || createIntegrationMutation.isPending}
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200"
                                     >
                                         {updateIntegrationMutation.isPending || createIntegrationMutation.isPending ? 'Saving...' : (editingIntegrationId ? 'Update Integration' : 'Link Account')}
                                     </button>
@@ -769,6 +811,65 @@ export function AccountProfileModal({ isOpen, onClose }: Props) {
                                     className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
                                 >
                                     {createBankAccountMutation.isPending ? 'Adding...' : 'Add Account'}
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* INCOME SOURCES TAB */}
+                    {activeTab === 'Income Sources' && (
+                        <div className="space-y-6">
+
+                            {/* Existing Sources List */}
+                            {namedIncomeSources.length > 0 && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-color-text-main">Configured Income Sources</h3>
+                                    <div className="space-y-2">
+                                        {namedIncomeSources.map((source) => (
+                                            <div key={source.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-indigo-100 text-indigo-700 p-2 rounded-lg">
+                                                        <Plus className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-color-text-main">{source.name}</div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => source.id && deleteNamedIncomeSourceMutation.mutate(source.id)}
+                                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                                    title="Remove Source"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleNamedIncomeSourceSubmit} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-xl space-y-4">
+                                <h3 className="text-sm font-semibold text-color-text-main flex items-center gap-2">
+                                    <Plus className="w-4 h-4 text-indigo-600" />
+                                    Add Income Source
+                                </h3>
+                                <div>
+                                    <label className="block text-xs font-medium text-color-text-main mb-1">Source Name</label>
+                                    <input
+                                        type="text"
+                                        value={newSourceName}
+                                        onChange={(e) => setNewSourceName(e.target.value)}
+                                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 text-color-text-main rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="e.g. Fidelity BrokerageLink"
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={createNamedIncomeSourceMutation.isPending}
+                                    className="w-full bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 dark:hover:bg-slate-600 transition duration-200"
+                                >
+                                    {createNamedIncomeSourceMutation.isPending ? 'Adding...' : 'Add Source'}
                                 </button>
                             </form>
                         </div>

@@ -106,3 +106,9 @@ export interface BankAccount {
     accountName?: string;
     accountType: string;
 }
+
+export interface NamedIncomeSource {
+    id?: string;
+    userId?: string;
+    name: string;
+}

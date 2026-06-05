@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
-import { useState } from 'react';
-import type { IncomeSource, IncomeFrequency } from '../types/models';
+import type { IncomeFrequency, IncomeSource } from '../types/models';
 import { PlusCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -32,6 +32,12 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
     const { data: incomeTypes } = useQuery({
         queryKey: ['config', 'IncomeType'],
         queryFn: () => apiClient.getConfigByGroup('IncomeType')
+    });
+
+    // Fetch custom income sources
+    const { data: customSources } = useQuery({
+        queryKey: ['namedIncomeSources'],
+        queryFn: () => apiClient.getNamedIncomeSources()
     });
 
     const mutation = useMutation({
@@ -94,13 +100,34 @@ export const IncomeSourceForm = ({ initialData, onSuccess, onCancel }: IncomeSou
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-color-text-main mb-1">Source Name</label>
-                    <input
-                        type="text" required
-                        placeholder="e.g. Apple Dividends"
-                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
+                    <label className="block text-sm font-medium text-color-text-main mb-1">Income Source</label>
+                    <select
+                        required
+                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-color-text-main"
                         value={formData.source}
                         onChange={e => setFormData({ ...formData, source: e.target.value })}
+                    >
+                        <option value="">Select Income Source...</option>
+                        {(() => {
+                            const options = customSources ? [...customSources] : [];
+                            if (formData.source && !options.some(opt => opt.name === formData.source)) {
+                                options.push({ id: 'temp-existing', name: formData.source });
+                            }
+                            return options.map(src => (
+                                <option key={src.id} value={src.name}>{src.name}</option>
+                            ));
+                        })()}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-color-text-main mb-1">Description</label>
+                    <input
+                        type="text" required
+                        placeholder="e.g. Q3 payment"
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-color-text-main"
+                        value={formData.description}
+                        onChange={e => setFormData({ ...formData, description: e.target.value })}
                     />
                 </div>
 
