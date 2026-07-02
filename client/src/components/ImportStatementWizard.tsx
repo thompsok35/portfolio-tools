@@ -239,7 +239,7 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
                                 >
                                     <option value="">-- Select an Expected Income Account --</option>
                                     {expectedIncomes.map(inc => (
-                                        <option key={inc.id} value={inc.id}>{inc.source}</option>
+                                        <option key={inc.id} value={inc.id}>{inc.source}{inc.description ? ` - ${inc.description}` : ""}</option>
                                     ))}
                                 </select>
                             </div>
@@ -489,3 +489,4 @@ export const ImportStatementWizard = ({ isOpen, onClose, year, month, expectedIn
         </div>
     );
 };
+
